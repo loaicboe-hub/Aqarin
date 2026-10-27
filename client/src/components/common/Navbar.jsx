@@ -4,7 +4,6 @@ import {
   Building2, 
   Menu, 
   X, 
-  Plus, 
   LogOut, 
   LayoutDashboard,
   Zap,
@@ -146,7 +145,7 @@ export default function Navbar() {
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
-              className="text-xs font-bold text-slate-600 hover:text-[#0B1C3D] px-2.5 py-1.5 rounded-full border border-slate-200 transition-colors"
+              className="text-xs font-bold text-slate-600 hover:text-[#0B1C3D] px-3 py-1.5 rounded-full border border-slate-200 transition-colors"
             >
               {lang === 'en' ? 'عربي' : 'EN'}
             </button>
@@ -171,20 +170,11 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/signin"
-                className="text-xs font-bold text-[#0B1C3D] hover:text-sky-600 transition-colors px-2 py-1"
+                className="px-4 py-2 rounded-full text-xs font-bold text-white bg-[#0B1C3D] hover:bg-[#122B5C] transition-colors shadow-sm"
               >
                 {isRTL ? 'تسجيل الدخول' : 'Sign In'}
               </Link>
             )}
-
-            {/* + Add Property Button */}
-            <Link
-              to="/add-property"
-              className="px-4 py-2 rounded-full text-xs font-bold text-white bg-[#0B1C3D] hover:bg-[#122B5C] flex items-center gap-1 shadow-sm transition-all hover:scale-105"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{isRTL ? 'أضف عقارك' : 'Add Property'}</span>
-            </Link>
 
           </div>
 
@@ -210,15 +200,6 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-xl animate-in slide-in-from-top-2">
-          <Link
-            to="/add-property"
-            onClick={() => setMobileMenuOpen(false)}
-            className="w-full py-3 rounded-full text-center font-bold text-white bg-[#0B1C3D] flex items-center justify-center gap-2 shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{isRTL ? 'أضف عقارك الآن' : 'Add Property'}</span>
-          </Link>
-
           <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-bold text-[#0B1C3D]">
             {/* 1. Fast Buy */}
             <Link 
