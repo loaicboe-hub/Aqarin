@@ -121,7 +121,7 @@ export default function Navbar() {
               }`}
             >
               <Paintbrush className={`w-3.5 h-3.5 ${isActive('/finishing') ? 'text-white' : 'text-teal-600'}`} />
-              <span>{isRTL ? 'تشطيبات' : 'تشطيبات'}</span>
+              <span>{isRTL ? 'تشطيبات' : 'Finishing'}</span>
             </Link>
 
           </nav>
