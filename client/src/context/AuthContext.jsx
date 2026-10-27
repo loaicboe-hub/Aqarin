@@ -4,10 +4,10 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('aqarin_user') || localStorage.getItem('buildingiscore_user');
+    const saved = localStorage.getItem('aqarin_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [token, setToken] = useState(() => localStorage.getItem('aqarin_token') || localStorage.getItem('buildingiscore_token') || null);
+  const [token, setToken] = useState(() => localStorage.getItem('aqarin_token') || null);
 
   const login = (userData, authToken) => {
     setUser(userData);
@@ -21,8 +21,6 @@ export function AuthProvider({ children }) {
     setToken(null);
     localStorage.removeItem('aqarin_user');
     localStorage.removeItem('aqarin_token');
-    localStorage.removeItem('buildingiscore_user');
-    localStorage.removeItem('buildingiscore_token');
   };
 
   return (

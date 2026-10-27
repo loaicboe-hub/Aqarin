@@ -65,7 +65,7 @@ export default function PropertyCard({ property }) {
         {/* Score Badge */}
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 text-[#0B1C3D] text-xs font-extrabold shadow-sm backdrop-blur-md">
           <span className="text-[10px] text-emerald-700 font-bold">{isRTL ? 'مؤشر عقار' : 'Aqar Score'}</span>
-          <span className="text-emerald-600">{property.aqarScore || property.iscoreRating || '9.4'}</span>
+          <span className="text-emerald-600">{property.aqarScore || '9.4'}</span>
           <span className="text-[10px] text-slate-400 font-normal">/10</span>
         </div>
 

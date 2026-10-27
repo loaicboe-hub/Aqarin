@@ -105,7 +105,7 @@ export default function PropertyDetailsPage() {
               </span>
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Aqar Score: {property.aqarScore || property.iscoreRating || '9.4'}/10</span>
+                <span>Aqar Score: {property.aqarScore || '9.4'}/10</span>
               </div>
             </div>
 

@@ -31,7 +31,7 @@ INSERT INTO `location_benchmarks` (`city_en`, `city_ar`, `district_en`, `distric
 ('Cairo', 'القاهرة', 'Zamalek', 'الزمالك', 'Gezira Island', 'جزيرة الزمالك', 85000, 70000, 130000, 7.2, 16.0, 30.0600, 31.2200);
 
 -- 3. Realistic Featured Properties in Egypt
-INSERT INTO `properties` (`id`, `title_en`, `title_ar`, `description_en`, `description_ar`, `purpose`, `category`, `property_type`, `price`, `area_sqm`, `bedrooms`, `bathrooms`, `floor_level`, `finishing_type`, `delivery_status`, `delivery_year`, `payment_type`, `down_payment`, `installment_years`, `monthly_installment`, `city`, `district`, `compound`, `address`, `lat`, `lng`, `iscore_rating`, `images_json`, `amenities_json`, `featured`, `status`, `user_id`, `views_count`) VALUES
+INSERT INTO `properties` (`id`, `title_en`, `title_ar`, `description_en`, `description_ar`, `purpose`, `category`, `property_type`, `price`, `area_sqm`, `bedrooms`, `bathrooms`, `floor_level`, `finishing_type`, `delivery_status`, `delivery_year`, `payment_type`, `down_payment`, `installment_years`, `monthly_installment`, `city`, `district`, `compound`, `address`, `lat`, `lng`, `aqar_score`, `images_json`, `amenities_json`, `featured`, `status`, `user_id`, `views_count`) VALUES
 (1, 
  'Luxury 3BR Apartment with Lagoon View in Mivida', 
  'شقة فاخرة 3 غرف بإطلالة على اللاجون في ميفيدا', 

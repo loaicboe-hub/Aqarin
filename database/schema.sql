@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `properties` (
   `address` VARCHAR(255) DEFAULT NULL,
   `lat` DECIMAL(10, 7) NOT NULL,
   `lng` DECIMAL(10, 7) NOT NULL,
-  `iscore_rating` DECIMAL(3, 1) DEFAULT 8.8,
+  `aqar_score` DECIMAL(3, 1) DEFAULT 8.8,
   `images_json` JSON NOT NULL,
   `amenities_json` JSON NOT NULL,
   `featured` BOOLEAN DEFAULT FALSE,

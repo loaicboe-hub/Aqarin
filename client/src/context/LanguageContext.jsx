@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem('aqarin_lang') || localStorage.getItem('buildingiscore_lang') || 'en');
+  const [lang, setLang] = useState(() => localStorage.getItem('aqarin_lang') || 'en');
 
   useEffect(() => {
     localStorage.setItem('aqarin_lang', lang);

@@ -72,7 +72,7 @@ export const INITIAL_PROPERTIES = [
     address: 'Golden Square, Road 90, New Cairo',
     lat: 30.0167,
     lng: 31.4833,
-    iscoreRating: 9.4,
+    aqarScore: 9.4,
     images: [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -110,7 +110,7 @@ export const INITIAL_PROPERTIES = [
     address: 'Cairo-Alex Desert Road, Sheikh Zayed',
     lat: 30.0520,
     lng: 30.9850,
-    iscoreRating: 9.8,
+    aqarScore: 9.8,
     images: [
       'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80',
@@ -148,7 +148,7 @@ export const INITIAL_PROPERTIES = [
     address: 'KM 210 Alex-Matrouh Road',
     lat: 31.1100,
     lng: 27.8400,
-    iscoreRating: 9.6,
+    aqarScore: 9.6,
     images: [
       'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'
@@ -185,7 +185,7 @@ export const INITIAL_PROPERTIES = [
     address: 'Financial District Axis, New Capital',
     lat: 30.0150,
     lng: 31.7200,
-    iscoreRating: 9.1,
+    aqarScore: 9.1,
     images: [
       'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80'
@@ -222,7 +222,7 @@ export const INITIAL_PROPERTIES = [
     address: 'Hassan Sabry Street, Zamalek',
     lat: 30.0600,
     lng: 31.2200,
-    iscoreRating: 9.7,
+    aqarScore: 9.7,
     images: [
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80'
@@ -259,7 +259,7 @@ export const INITIAL_PROPERTIES = [
     address: 'Middle Ring Road, New Cairo',
     lat: 30.0612,
     lng: 31.5420,
-    iscoreRating: 9.3,
+    aqarScore: 9.3,
     images: [
       'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=80'

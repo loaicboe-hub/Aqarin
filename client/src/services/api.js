@@ -13,7 +13,7 @@ const LOCAL_VALUATIONS_KEY = 'aqarin_valuations';
 const LOCAL_SAVED_PROPERTIES_KEY = 'aqarin_saved_props';
 
 function getLocalProperties() {
-  const saved = localStorage.getItem(LOCAL_PROPERTIES_KEY) || localStorage.getItem('buildingiscore_properties');
+  const saved = localStorage.getItem(LOCAL_PROPERTIES_KEY);
   if (!saved) {
     localStorage.setItem(LOCAL_PROPERTIES_KEY, JSON.stringify(INITIAL_PROPERTIES));
     return INITIAL_PROPERTIES;
@@ -129,7 +129,6 @@ export async function createProperty(propertyData) {
     id: Date.now(),
     ...propertyData,
     aqarScore: 9.4,
-    iscoreRating: 9.4,
     viewsCount: 1,
     featured: false,
     owner: { name: 'Verified Seller', phone: '+201000000000', whatsapp: '+201000000000', verified: true }

@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
       });
     } catch (dbErr) {
       // Mock login for demo if MySQL is temporarily disconnected
-      if ((email === 'admin@aqarin.com' || email === 'admin@buildingiscore.com') && password === 'admin123') {
+      if (email === 'admin@aqarin.com' && password === 'admin123') {
         const token = jwt.sign({ id: 1, email: 'admin@aqarin.com', role: 'admin', name: 'AQAR IN Admin' }, JWT_SECRET, { expiresIn: '30d' });
         return res.json({
           success: true,

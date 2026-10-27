@@ -100,7 +100,7 @@ router.get('/', async (req, res) => {
     } else if (sort === 'area_desc') {
       query += ' ORDER BY area_sqm DESC';
     } else if (sort === 'rating_desc') {
-      query += ' ORDER BY iscore_rating DESC';
+      query += ' ORDER BY aqar_score DESC';
     } else {
       query += ' ORDER BY featured DESC, id DESC';
     }
@@ -209,7 +209,7 @@ router.post('/', async (req, res) => {
         title_en, title_ar, description_en, description_ar, purpose, category, property_type,
         price, area_sqm, bedrooms, bathrooms, floor_level, finishing_type, delivery_status,
         delivery_year, payment_type, down_payment, installment_years, monthly_installment,
-        city, district, compound, address, lat, lng, iscore_rating, images_json, amenities_json,
+        city, district, compound, address, lat, lng, aqar_score, images_json, amenities_json,
         status, user_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 9.0, ?, ?, 'published', ?)`,
       [
