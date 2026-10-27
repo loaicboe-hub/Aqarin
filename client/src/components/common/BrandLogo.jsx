@@ -1,12 +1,10 @@
 import React from 'react';
-import { useLanguage } from '../../context/LanguageContext';
 
-export default function BrandLogo({ variant = 'default', showTagline = true, className = '' }) {
-  const { isRTL } = useLanguage();
+export default function BrandLogo({ variant = 'default', className = '' }) {
   const isWhite = variant === 'white';
 
   return (
-    <div className={`flex items-center gap-3 select-none ${className}`}>
+    <div className={`flex items-center gap-2.5 select-none ${className}`}>
       {/* Modern Architectural Icon Badge */}
       <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl transition-transform duration-300 group-hover:scale-105 shadow-sm ${
         isWhite 
@@ -25,7 +23,7 @@ export default function BrandLogo({ variant = 'default', showTagline = true, cla
             d="M16 8L22 14H10L16 8Z" 
             fill="#38BDF8" 
           />
-          {/* "IN" Dot / Smart Beacon */}
+          {/* Beacon Dot */}
           <circle 
             cx="16" 
             cy="13" 
@@ -41,31 +39,16 @@ export default function BrandLogo({ variant = 'default', showTagline = true, cla
         </span>
       </div>
 
-      {/* Typography Block */}
-      <div className="flex flex-col text-left leading-tight">
-        <div className="flex items-center gap-1.5">
-          <span className={`text-lg sm:text-xl font-black tracking-tight ${
-            isWhite ? 'text-white' : 'text-[#0B1C3D]'
-          }`}>
-            AQAR
-          </span>
-          <span className="text-xs font-black uppercase px-1.5 py-0.5 rounded bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-xs">
-            IN
-          </span>
-          <span className={`text-xs font-bold mr-1 ${
-            isWhite ? 'text-slate-300' : 'text-slate-500'
-          }`}>
-            عقار إن
-          </span>
-        </div>
-
-        {showTagline && (
-          <span className={`text-[10px] font-medium tracking-wide ${
-            isWhite ? 'text-slate-400' : 'text-slate-500'
-          }`}>
-            {isRTL ? 'المنصة الذكية للتقييم والعقارات' : 'Smart Property Intelligence'}
-          </span>
-        )}
+      {/* Typography: ONLY AQAR IN */}
+      <div className="flex items-center gap-1.5 leading-none">
+        <span className={`text-xl sm:text-2xl font-black tracking-tight ${
+          isWhite ? 'text-white' : 'text-[#0B1C3D]'
+        }`}>
+          AQAR
+        </span>
+        <span className="text-xs sm:text-sm font-black uppercase px-2 py-0.5 rounded-md bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-xs">
+          IN
+        </span>
       </div>
     </div>
   );
