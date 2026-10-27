@@ -11,6 +11,7 @@ import {
   Rocket,
   ArrowLeftRight,
   Paintbrush,
+  Briefcase,
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -122,6 +123,19 @@ export default function Navbar() {
             >
               <Paintbrush className={`w-3.5 h-3.5 ${isActive('/finishing') ? 'text-white' : 'text-teal-600'}`} />
               <span>{isRTL ? 'تشطيبات' : 'Finishing'}</span>
+            </Link>
+
+            {/* 8. Management (إدارة الأملاك) */}
+            <Link
+              to="/management"
+              className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${
+                isActive('/management')
+                  ? 'bg-indigo-600 text-white font-black shadow-sm'
+                  : 'text-indigo-800 bg-indigo-50 hover:bg-indigo-100 hover:scale-105'
+              }`}
+            >
+              <Briefcase className={`w-3.5 h-3.5 ${isActive('/management') ? 'text-white' : 'text-indigo-600'}`} />
+              <span>{isRTL ? 'إدارة الأملاك' : 'Management'}</span>
             </Link>
 
           </nav>
@@ -267,10 +281,20 @@ export default function Navbar() {
             <Link 
               to="/finishing" 
               onClick={() => setMobileMenuOpen(false)} 
-              className="col-span-2 p-3 bg-teal-50 text-teal-800 rounded-xl flex items-center justify-center gap-2 border border-teal-100"
+              className="p-3 bg-teal-50 text-teal-800 rounded-xl flex items-center gap-2 border border-teal-100"
             >
               <Paintbrush className="w-4 h-4 text-teal-600" />
-              <span>{isRTL ? '7. تشطيبات وديكور' : '7. Finishing & Decor'}</span>
+              <span>{isRTL ? '7. تشطيبات' : '7. Finishing'}</span>
+            </Link>
+
+            {/* 8. Management */}
+            <Link 
+              to="/management" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="p-3 bg-indigo-50 text-indigo-800 rounded-xl flex items-center gap-2 border border-indigo-100"
+            >
+              <Briefcase className="w-4 h-4 text-indigo-600" />
+              <span>{isRTL ? '8. إدارة الأملاك' : '8. Management'}</span>
             </Link>
           </div>
         </div>
