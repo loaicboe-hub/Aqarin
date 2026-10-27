@@ -21,6 +21,10 @@ import { SignInPage, SignUpPage, ForgotPasswordPage } from './pages/AuthPages';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import TermsPrivacyPage from './pages/TermsPrivacyPage';
+import FastBuyPage from './pages/FastBuyPage';
+import FastSellPage from './pages/FastSellPage';
+import ExchangePage from './pages/ExchangePage';
+import FinishingPage from './pages/FinishingPage';
 
 // ScrollToTop on route transition
 function ScrollToTop() {
@@ -49,9 +53,14 @@ export default function App() {
           <Route path="/valuation/professional" element={<ProfessionalValuationPage />} />
           <Route path="/valuation/professional-request" element={<ProfessionalValuationPage />} />
 
-          {/* Search & Discovery Routes */}
+          {/* Core Services (Fast Buy, Fast Sell, Buy, Sell, Rent, Exchange, Finishing) */}
+          <Route path="/fast-buy" element={<FastBuyPage />} />
+          <Route path="/fast-sell" element={<FastSellPage />} />
           <Route path="/buy" element={<SearchPage />} />
+          <Route path="/sell" element={<AddPropertyPage />} />
           <Route path="/rent" element={<SearchPage />} />
+          <Route path="/exchange" element={<ExchangePage />} />
+          <Route path="/finishing" element={<FinishingPage />} />
           <Route path="/commercial" element={<SearchPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/property/:id" element={<PropertyDetailsPage />} />
