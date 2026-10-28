@@ -12,13 +12,15 @@ router.post('/property-inquiry', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Property ID, name, and phone are required' });
     }
 
-    await pool.query(
-      'INSERT INTO leads_inquiries (property_id, user_id, name, phone, email, message, inquiry_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [propertyId, userId, name, phone, email || '', message || '', inquiryType]
+    const { rows } = await pool.query(
+      `INSERT INTO leads_inquiries (property_id, user_id, name, phone, email, message, inquiry_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [propertyId, userId || null, name, phone, email || '', message || '', inquiryType]
     );
 
     res.status(201).json({
       success: true,
+      inquiryId: rows[0].id,
       message: 'Inquiry sent successfully to the property agent'
     });
   } catch (err) {
@@ -36,13 +38,15 @@ router.post('/partner-apply', async (req, res) => {
       return res.status(400).json({ error: true, message: 'All essential partner fields are required' });
     }
 
-    await pool.query(
-      'INSERT INTO partner_applications (name, company_name, email, phone, partner_type, city, message) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    const { rows } = await pool.query(
+      `INSERT INTO partner_applications (name, company_name, email, phone, partner_type, city, message)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
       [name, companyName, email, phone, partnerType, city || 'Cairo', message || '']
     );
 
     res.status(201).json({
       success: true,
+      applicationId: rows[0].id,
       message: 'Partner application received. Our business development team will reach out soon.'
     });
   } catch (err) {

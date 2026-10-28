@@ -16,7 +16,7 @@ import {
   Send
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { EGYPT_LOCATIONS } from '../data/mockData';
+import { submitFastSell } from '../services/api';
 
 export default function FastSellPage() {
   const { isRTL } = useLanguage();
@@ -37,14 +37,32 @@ export default function FastSellPage() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      await submitFastSell({
+        city: form.city,
+        district: form.district,
+        compound: form.compound,
+        propertyType: form.propertyType,
+        areaSqm: Number(form.areaSqm),
+        finishingType: form.finishing,
+        expectedPrice: Number(form.expectedPrice),
+        ownerName: form.ownerName,
+        phone: form.phone,
+        whatsapp: form.whatsapp,
+        urgentReason: form.urgentReason
+      });
       setSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

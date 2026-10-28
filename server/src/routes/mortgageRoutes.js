@@ -84,7 +84,6 @@ router.post('/calculate', (req, res) => {
     const monthlyRate = (Number(interestRate) / 100) / 12;
     const totalMonths = Number(tenureYears) * 12;
 
-    // Monthly payment formula: P * (r * (1 + r)^n) / ((1 + r)^n - 1)
     let monthlyInstallment = 0;
     if (monthlyRate > 0) {
       monthlyInstallment = Math.round(
@@ -140,25 +139,35 @@ router.post('/apply', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Full name, phone, property price, and monthly income are required' });
     }
 
-    await pool.query(
+    const { rows } = await pool.query(
       `INSERT INTO mortgage_inquiries (
         user_id, property_id, full_name, phone, email, property_price,
         down_payment, loan_amount, tenure_years, monthly_income,
         preferred_bank, estimated_installment, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new')`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'new') RETURNING id`,
       [
-        userId, propertyId, fullName, phone, email || '', propertyPrice,
-        downPayment || 0, loanAmount || propertyPrice * 0.8, tenureYears || 15,
-        monthlyIncome, preferredBank, estimatedInstallment || 0
+        userId || null,
+        propertyId || null,
+        fullName,
+        phone,
+        email || '',
+        propertyPrice,
+        downPayment || 0,
+        loanAmount || 0,
+        tenureYears || 15,
+        monthlyIncome,
+        preferredBank,
+        estimatedInstallment || 0
       ]
     );
 
     res.status(201).json({
       success: true,
-      message: 'Mortgage application submitted. A mortgage specialist will contact you within 24 hours.'
+      applicationId: rows[0].id,
+      message: 'Mortgage pre-approval application submitted successfully to partner banking network'
     });
   } catch (err) {
-    console.error('Mortgage application error:', err);
+    console.error('Mortgage apply error:', err);
     res.status(500).json({ error: true, message: 'Application submission failed: ' + err.message });
   }
 });

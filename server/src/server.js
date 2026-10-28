@@ -11,6 +11,7 @@ import valuationRoutes from './routes/valuationRoutes.js';
 import mortgageRoutes from './routes/mortgageRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import serviceRoutes from './routes/serviceRoutes.js';
 
 dotenv.config();
 
@@ -33,13 +34,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'online',
-    platform: 'AQAR IN (عقار إن) API',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT version(), current_database(), PostGIS_Version();');
+    res.json({
+      status: 'online',
+      platform: 'AQAR IN (عقار إن) API',
+      database: 'PostgreSQL 16 + PostGIS',
+      current_database: rows[0].current_database,
+      postgis_version: rows[0].postgis_version,
+      timestamp: new Date().toISOString(),
+      version: '2.0.0-postgres'
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'degraded',
+      platform: 'AQAR IN (عقار إن) API',
+      database_error: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API Routes
@@ -49,6 +63,7 @@ app.use('/api/valuation', valuationRoutes);
 app.use('/api/mortgage', mortgageRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -64,3 +79,5 @@ app.listen(PORT, async () => {
   console.log(`🚀 AQAR IN (عقار إن) API server running on http://localhost:${PORT}`);
   await testDbConnection();
 });
+
+export default app;

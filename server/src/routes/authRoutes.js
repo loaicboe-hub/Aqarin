@@ -18,13 +18,15 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     try {
-      const [result] = await pool.query(
-        'INSERT INTO users (full_name, email, password_hash, phone, role) VALUES (?, ?, ?, ?, ?)',
+      const { rows } = await pool.query(
+        'INSERT INTO users (full_name, email, password_hash, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, full_name, email, role, phone',
         [fullName, email.toLowerCase().trim(), passwordHash, phone || null, role || 'buyer']
       );
 
+      const newUser = rows[0];
+
       const token = jwt.sign(
-        { id: result.insertId, email: email.toLowerCase().trim(), role: role || 'buyer', name: fullName },
+        { id: newUser.id, email: newUser.email, role: newUser.role, name: newUser.full_name },
         JWT_SECRET,
         { expiresIn: '30d' }
       );
@@ -33,11 +35,17 @@ router.post('/register', async (req, res) => {
         success: true,
         message: 'Account created successfully',
         token,
-        user: { id: result.insertId, fullName, email: email.toLowerCase().trim(), role: role || 'buyer', phone }
+        user: {
+          id: newUser.id,
+          fullName: newUser.full_name,
+          email: newUser.email,
+          role: newUser.role,
+          phone: newUser.phone
+        }
       });
     } catch (dbErr) {
-      // Handle fallback or duplicate email
-      if (dbErr.code === 'ER_DUP_ENTRY') {
+      // PostgreSQL unique_violation error code is 23505
+      if (dbErr.code === '23505') {
         return res.status(400).json({ error: true, message: 'This email is already registered' });
       }
       throw dbErr;
@@ -56,47 +64,34 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: true, message: 'Email and password are required' });
     }
 
-    try {
-      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email.toLowerCase().trim()]);
-      if (rows.length === 0) {
-        return res.status(401).json({ error: true, message: 'Invalid email or password' });
-      }
-
-      const user = rows[0];
-      const isMatch = await bcrypt.compare(password, user.password_hash);
-      if (!isMatch) {
-        return res.status(401).json({ error: true, message: 'Invalid email or password' });
-      }
-
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role, name: user.full_name },
-        JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-
-      return res.json({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          fullName: user.full_name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone
-        }
-      });
-    } catch (dbErr) {
-      // Mock login for demo if MySQL is temporarily disconnected
-      if (email === 'admin@aqarin.com' && password === 'admin123') {
-        const token = jwt.sign({ id: 1, email: 'admin@aqarin.com', role: 'admin', name: 'AQAR IN Admin' }, JWT_SECRET, { expiresIn: '30d' });
-        return res.json({
-          success: true,
-          token,
-          user: { id: 1, fullName: 'AQAR IN Admin', email: 'admin@aqarin.com', role: 'admin' }
-        });
-      }
-      throw dbErr;
+    const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (rows.length === 0) {
+      return res.status(401).json({ error: true, message: 'Invalid email or password' });
     }
+
+    const user = rows[0];
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: true, message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.full_name },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        fullName: user.full_name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone
+      }
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: true, message: 'Login failed: ' + err.message });
@@ -114,7 +109,10 @@ router.get('/me', async (req, res) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const [rows] = await pool.query('SELECT id, full_name, email, phone, role, created_at FROM users WHERE id = ?', [decoded.id]);
+    const { rows } = await pool.query(
+      'SELECT id, full_name, email, phone, role, created_at FROM users WHERE id = $1',
+      [decoded.id]
+    );
     if (rows.length === 0) {
       return res.status(404).json({ error: true, message: 'User not found' });
     }

@@ -14,12 +14,36 @@ import {
   Scale
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { submitPropertyExchange } from '../services/api';
 
 export default function ExchangePage() {
   const { isRTL } = useLanguage();
 
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'submit'
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [offering, setOffering] = useState('');
+  const [seeking, setSeeking] = useState('');
+  const [phone, setPhone] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+
+  const handleExchangeSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await submitPropertyExchange({
+        offeringSpecs: offering,
+        seekingSpecs: seeking,
+        phone,
+        whatsapp
+      });
+      setSubmitted(true);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Sample active exchange opportunities
   const sampleExchanges = [
@@ -197,12 +221,14 @@ export default function ExchangePage() {
             <h2 className="text-xl font-black text-[#0B1C3D]">
               {isRTL ? 'سجل عقارك في خدمة التبادل العقاري' : 'Submit Your Property for Swap'}
             </h2>
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-4">
+            <form onSubmit={handleExchangeSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'مواصفات عقارك الحالي' : 'Your Current Property'}</label>
                 <input
                   type="text"
                   required
+                  value={offering}
+                  onChange={(e) => setOffering(e.target.value)}
                   placeholder={isRTL ? 'شقة 160م، ميفيدا، التجمع الخامس' : 'e.g. 160m Apartment, Mivida, New Cairo'}
                   className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-[#0B1C3D] outline-none"
                 />
@@ -213,6 +239,8 @@ export default function ExchangePage() {
                 <input
                   type="text"
                   required
+                  value={seeking}
+                  onChange={(e) => setSeeking(e.target.value)}
                   placeholder={isRTL ? 'فيلا أو تاون هاوس في الشيخ زايد أو أكتوبر' : 'e.g. Townhouse or Villa in Sheikh Zayed'}
                   className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-[#0B1C3D] outline-none"
                 />
@@ -224,6 +252,8 @@ export default function ExchangePage() {
                   <input
                     type="tel"
                     required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     placeholder="+2010..."
                     className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-[#0B1C3D] outline-none"
                   />
@@ -232,6 +262,8 @@ export default function ExchangePage() {
                   <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'رقم واتساب' : 'WhatsApp'}</label>
                   <input
                     type="tel"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
                     placeholder="+2010..."
                     className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-[#0B1C3D] outline-none"
                   />
@@ -240,7 +272,8 @@ export default function ExchangePage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-full bg-[#0B1C3D] hover:bg-[#122B5C] text-white font-bold text-xs shadow-md"
+                disabled={submitting}
+                className="w-full py-3.5 rounded-full bg-[#0B1C3D] hover:bg-[#122B5C] text-white font-bold text-xs shadow-md disabled:opacity-50"
               >
                 {submitted ? (isRTL ? '✓ تم إرسال طلب التبادل بنجاح' : '✓ Request Submitted') : (isRTL ? 'نشر طلب التبادل العقاري' : 'Publish Exchange Request')}
               </button>

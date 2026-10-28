@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { submitPropertyManagement } from '../services/api';
 
 export default function ManagementPage() {
   const { isRTL } = useLanguage();
@@ -35,13 +36,23 @@ export default function ManagementPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await submitPropertyManagement({
+        planType: form.managementType,
+        ownerName: form.ownerName,
+        phone: form.phone,
+        city: form.city,
+        compound: form.compound || form.district
+      });
       setSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const PLANS = [
