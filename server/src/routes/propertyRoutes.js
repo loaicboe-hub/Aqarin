@@ -113,10 +113,10 @@ router.get('/', async (req, res) => {
       pIdx++;
     }
 
-    // Native PostGIS Radius Proximity Search (Unit: METERS)
-    if (lat && lng && radiusMeters) {
+    const radiusInMeters = radiusMeters ? Number(radiusMeters) : (req.query.radiusKm ? Number(req.query.radiusKm) * 1000 : null);
+    if (lat && lng && radiusInMeters) {
       query += ` AND ST_DWithin(location_geog, ST_SetSRID(ST_MakePoint($${pIdx++}, $${pIdx++}), 4326)::geography, $${pIdx++})`;
-      params.push(Number(lng), Number(lat), Number(radiusMeters));
+      params.push(Number(lng), Number(lat), radiusInMeters);
     }
 
     // Native PostGIS Map Viewport Bounding Box Search
