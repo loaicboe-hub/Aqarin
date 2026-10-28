@@ -7,7 +7,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { calculateMortgage } from '../services/api';
+import { calculateMortgage, fetchMortgageBanks } from '../services/api';
 import { EGYPT_BANKS } from '../data/mockData';
 
 export default function MortgageCalculatorPage() {
@@ -19,8 +19,17 @@ export default function MortgageCalculatorPage() {
   const [tenureYears, setTenureYears] = useState(15);
   const [interestRate, setInterestRate] = useState(18.5);
   const [selectedBank, setSelectedBank] = useState('cib');
+  const [banksList, setBanksList] = useState(EGYPT_BANKS);
 
   const [calcResult, setCalcResult] = useState(null);
+
+  useEffect(() => {
+    fetchMortgageBanks()
+      .then(banks => {
+        if (banks && banks.length > 0) setBanksList(banks);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     calculateMortgage({
@@ -131,7 +140,7 @@ export default function MortgageCalculatorPage() {
             <div className="space-y-3 pt-2">
               <label className="text-xs font-bold text-slate-700 block">{isRTL ? 'اختر البنك' : 'Select Bank'}</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {EGYPT_BANKS.map((bank) => (
+                {banksList.map((bank) => (
                   <button
                     key={bank.id}
                     type="button"

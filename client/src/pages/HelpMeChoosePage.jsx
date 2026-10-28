@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Compass, 
   CheckCircle2, 
   ArrowRight, 
   ArrowLeft, 
-  Sparkles 
+  Sparkles,
+  SearchX
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { HELP_ME_CHOOSE_QUESTIONS, INITIAL_PROPERTIES } from '../data/mockData';
+import { HELP_ME_CHOOSE_QUESTIONS } from '../data/mockData';
+import { fetchProperties } from '../services/api';
 import PropertyCard from '../components/common/PropertyCard';
 
 export default function HelpMeChoosePage() {
@@ -15,6 +17,23 @@ export default function HelpMeChoosePage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [finished, setFinished] = useState(false);
+  const [recommendedProps, setRecommendedProps] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (finished) {
+      setLoading(true);
+      fetchProperties()
+        .then(properties => {
+          setRecommendedProps(properties.slice(0, 3));
+        })
+        .catch(err => {
+          console.error('Failed to load recommended properties:', err);
+          setRecommendedProps([]);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [finished]);
 
   const handleSelectOption = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -122,11 +141,27 @@ export default function HelpMeChoosePage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {INITIAL_PROPERTIES.slice(0, 3).map((prop) => (
-                <PropertyCard key={prop.id} property={prop} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="py-12 text-center text-slate-500 font-medium text-sm">
+                {isRTL ? 'جاري مطابقة العقارات المتاحة...' : 'Loading matched properties...'}
+              </div>
+            ) : recommendedProps.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendedProps.map((prop) => (
+                  <PropertyCard key={prop.id} property={prop} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 bg-white rounded-3xl border border-slate-200 text-center space-y-3 p-8">
+                <SearchX className="w-10 h-10 text-slate-400 mx-auto" />
+                <p className="text-sm font-bold text-slate-700">
+                  {isRTL ? 'لا توجد عقارات مطابقة حالياً للمعايير المحددة' : 'No properties currently match these criteria.'}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {isRTL ? 'يرجى مراجعة الخيارات أو تصفح جميع العقارات المتاحة.' : 'Try adjusting your choices or browse all active listings.'}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
