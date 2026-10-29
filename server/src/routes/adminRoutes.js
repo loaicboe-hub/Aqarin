@@ -47,24 +47,35 @@ router.get('/benchmarks', async (req, res) => {
   }
 });
 
-// 3. Update Location Benchmark Prices
+// 3. Update Location Benchmark Prices & Investment Metrics (Price/sqm, Rental Yield %, Annual Growth %)
 router.put('/benchmarks/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { avg_price_sqm, min_price_sqm, max_price_sqm, rental_yield_pct, annual_growth_pct } = req.body;
 
-    const { rowCount } = await pool.query(
+    const numAvgPrice = avg_price_sqm !== undefined && avg_price_sqm !== '' ? Number(avg_price_sqm) : null;
+    const numMinPrice = min_price_sqm !== undefined && min_price_sqm !== '' ? Number(min_price_sqm) : (numAvgPrice ? Math.round(numAvgPrice * 0.88) : null);
+    const numMaxPrice = max_price_sqm !== undefined && max_price_sqm !== '' ? Number(max_price_sqm) : (numAvgPrice ? Math.round(numAvgPrice * 1.25) : null);
+    const numYield = rental_yield_pct !== undefined && rental_yield_pct !== '' ? Number(rental_yield_pct) : null;
+    const numGrowth = annual_growth_pct !== undefined && annual_growth_pct !== '' ? Number(annual_growth_pct) : null;
+
+    const { rowCount, rows } = await pool.query(
       `UPDATE location_benchmarks 
-       SET avg_price_sqm = $1, min_price_sqm = $2, max_price_sqm = $3, rental_yield_pct = $4, annual_growth_pct = $5 
-       WHERE id = $6`,
-      [avg_price_sqm, min_price_sqm, max_price_sqm, rental_yield_pct, annual_growth_pct, id]
+       SET avg_price_sqm = COALESCE($1, avg_price_sqm), 
+           min_price_sqm = COALESCE($2, min_price_sqm), 
+           max_price_sqm = COALESCE($3, max_price_sqm), 
+           rental_yield_pct = COALESCE($4, rental_yield_pct), 
+           annual_growth_pct = COALESCE($5, annual_growth_pct) 
+       WHERE id = $6
+       RETURNING id, city_en, city_ar, district_en, district_ar, compound_en, compound_ar, avg_price_sqm, min_price_sqm, max_price_sqm, rental_yield_pct, annual_growth_pct`,
+      [numAvgPrice, numMinPrice, numMaxPrice, numYield, numGrowth, id]
     );
 
     if (rowCount === 0) {
       return res.status(404).json({ error: true, message: 'Benchmark not found' });
     }
 
-    res.json({ success: true, message: 'Benchmark price updated successfully' });
+    res.json({ success: true, message: 'Benchmark updated successfully', data: rows[0] });
   } catch (err) {
     console.error('Update benchmark error:', err);
     res.status(500).json({ error: true, message: 'Update failed: ' + err.message });

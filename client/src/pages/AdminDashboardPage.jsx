@@ -49,7 +49,11 @@ export default function AdminDashboardPage() {
 
   // Benchmarks inline editing state
   const [editingId, setEditingId] = useState(null);
-  const [editPrice, setEditPrice] = useState(0);
+  const [editBenchmarkForm, setEditBenchmarkForm] = useState({
+    avg_price_sqm: '',
+    rental_yield_pct: '',
+    annual_growth_pct: ''
+  });
   const [savingId, setSavingId] = useState(null);
 
   // Property Edit & Delete state
@@ -98,25 +102,44 @@ export default function AdminDashboardPage() {
     loadData();
   }, [location.pathname]);
 
+  const handleStartEditBenchmark = (b) => {
+    setEditingId(b.id);
+    setEditBenchmarkForm({
+      avg_price_sqm: b.avg_price_sqm,
+      rental_yield_pct: b.rental_yield_pct,
+      annual_growth_pct: b.annual_growth_pct
+    });
+  };
+
   const handleSaveBenchmark = async (id) => {
     setSavingId(id);
     try {
-      const benchmark = benchmarks.find(b => b.id === id);
+      const newPrice = Number(editBenchmarkForm.avg_price_sqm);
+      const newYield = Number(editBenchmarkForm.rental_yield_pct);
+      const newGrowth = Number(editBenchmarkForm.annual_growth_pct);
+
       const res = await fetch(`/api/admin/benchmarks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          avg_price_sqm: Number(editPrice),
-          min_price_sqm: Math.round(Number(editPrice) * 0.88),
-          max_price_sqm: Math.round(Number(editPrice) * 1.25),
-          rental_yield_pct: Number(benchmark.rental_yield_pct),
-          annual_growth_pct: Number(benchmark.annual_growth_pct)
+          avg_price_sqm: newPrice,
+          min_price_sqm: Math.round(newPrice * 0.88),
+          max_price_sqm: Math.round(newPrice * 1.25),
+          rental_yield_pct: newYield,
+          annual_growth_pct: newGrowth
         })
       });
 
-      if (!res.ok) throw new Error('Failed to update benchmark price');
+      if (!res.ok) throw new Error('Failed to update benchmark');
       
-      setBenchmarks(prev => prev.map(b => b.id === id ? { ...b, avg_price_sqm: Number(editPrice) } : b));
+      setBenchmarks(prev => prev.map(b => b.id === id ? { 
+        ...b, 
+        avg_price_sqm: newPrice,
+        min_price_sqm: Math.round(newPrice * 0.88),
+        max_price_sqm: Math.round(newPrice * 1.25),
+        rental_yield_pct: newYield,
+        annual_growth_pct: newGrowth
+      } : b));
       setEditingId(null);
     } catch (err) {
       alert(`Error updating benchmark: ${err.message}`);
@@ -573,8 +596,8 @@ export default function AdminDashboardPage() {
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             {isRTL 
-              ? 'تعديل متوسط سعر المتر ينعكس فوراً ومباشرة في قاعدة بيانات PostgreSQL.' 
-              : 'Direct pricing benchmarks used across spatial search and market analytics in Egypt.'}
+              ? 'تعديل متوسط سعر المتر وعائد الإيجار % والنمو السنوي ينعكس فوراً ومباشرة في قاعدة بيانات PostgreSQL.' 
+              : 'Direct pricing benchmarks, rental yields, and annual growth rates tracked live in PostgreSQL.'}
           </p>
         </div>
 
@@ -618,44 +641,82 @@ export default function AdminDashboardPage() {
                   <td className="p-3.5 text-slate-500">{isRTL ? b.city_ar : b.city_en}</td>
                   <td className="p-3.5">
                     {editingId === b.id ? (
-                      <input
-                        type="number"
-                        value={editPrice}
-                        onChange={(e) => setEditPrice(e.target.value)}
-                        className="w-28 p-1.5 rounded-lg bg-white border border-[#0B1C3D] text-slate-900 font-bold text-xs"
-                      />
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          value={editBenchmarkForm.avg_price_sqm}
+                          onChange={(e) => setEditBenchmarkForm(prev => ({ ...prev, avg_price_sqm: e.target.value }))}
+                          className="w-24 p-1.5 rounded-lg bg-white border border-[#0B1C3D] text-slate-900 font-bold text-xs focus:ring-2 focus:ring-sky-500"
+                          placeholder="Price/m²"
+                        />
+                        <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap">EGP/m²</span>
+                      </div>
                     ) : (
                       <span className="font-extrabold text-[#0B1C3D]">{formatEGP(b.avg_price_sqm)} EGP/m²</span>
                     )}
                   </td>
-                  <td className="p-3.5 text-emerald-600 font-bold">{b.rental_yield_pct}%</td>
-                  <td className="p-3.5 text-sky-700 font-bold">+{b.annual_growth_pct}%</td>
+                  <td className="p-3.5">
+                    {editingId === b.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editBenchmarkForm.rental_yield_pct}
+                          onChange={(e) => setEditBenchmarkForm(prev => ({ ...prev, rental_yield_pct: e.target.value }))}
+                          className="w-16 p-1.5 rounded-lg bg-white border border-emerald-500 text-emerald-700 font-bold text-xs focus:ring-2 focus:ring-emerald-500"
+                          placeholder="Yield"
+                        />
+                        <span className="text-xs text-emerald-600 font-bold">%</span>
+                      </div>
+                    ) : (
+                      <span className="text-emerald-600 font-bold">{b.rental_yield_pct}%</span>
+                    )}
+                  </td>
+                  <td className="p-3.5">
+                    {editingId === b.id ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-sky-700 font-bold">+</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={editBenchmarkForm.annual_growth_pct}
+                          onChange={(e) => setEditBenchmarkForm(prev => ({ ...prev, annual_growth_pct: e.target.value }))}
+                          className="w-16 p-1.5 rounded-lg bg-white border border-sky-500 text-sky-700 font-bold text-xs focus:ring-2 focus:ring-sky-500"
+                          placeholder="Growth"
+                        />
+                        <span className="text-xs text-sky-700 font-bold">%</span>
+                      </div>
+                    ) : (
+                      <span className="text-sky-700 font-bold">+{b.annual_growth_pct}%</span>
+                    )}
+                  </td>
                   <td className="p-3.5 text-end">
                     {editingId === b.id ? (
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleSaveBenchmark(b.id)}
                           disabled={savingId === b.id}
-                          className="p-1.5 rounded-lg bg-emerald-600 text-white font-bold disabled:opacity-50"
-                          title="Save"
+                          className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1 transition-all shadow-xs disabled:opacity-50"
+                          title={isRTL ? 'حفظ التعديلات' : 'Save'}
                         >
-                          <Check className="w-4 h-4" />
+                          <Check className="w-3.5 h-3.5" />
+                          <span>{savingId === b.id ? '...' : (isRTL ? 'حفظ' : 'Save')}</span>
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="p-1.5 rounded-lg bg-slate-200 text-slate-700 hover:text-slate-900"
-                          title="Cancel"
+                          className="px-2 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors"
+                          title={isRTL ? 'إلغاء' : 'Cancel'}
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ) : (
                       <button
-                        onClick={() => { setEditingId(b.id); setEditPrice(b.avg_price_sqm); }}
+                        onClick={() => handleStartEditBenchmark(b)}
                         className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0B1C3D] text-xs font-bold inline-flex items-center gap-1 transition-colors"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
-                        <span>{isRTL ? 'تعديل السعر' : 'Edit'}</span>
+                        <span>{isRTL ? 'تعديل المؤشرات' : 'Edit'}</span>
                       </button>
                     )}
                   </td>

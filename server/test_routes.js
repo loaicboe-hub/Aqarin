@@ -197,6 +197,26 @@ async function runTests() {
     }
   });
 
+  // 13. Update Location Benchmark Price, Yield, and Growth
+  await test('PUT /api/admin/benchmarks/:id (Updates price/sqm, rental yield %, and annual growth %)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/benchmarks/1`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        avg_price_sqm: 85000,
+        rental_yield_pct: 8.5,
+        annual_growth_pct: 26.0
+      })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success || !json.data) {
+      throw new Error(`Benchmark update failed: ${JSON.stringify(json)}`);
+    }
+    if (Number(json.data.avg_price_sqm) !== 85000 || Number(json.data.rental_yield_pct) !== 8.5 || Number(json.data.annual_growth_pct) !== 26.0) {
+      throw new Error(`Benchmark updated values mismatch: ${JSON.stringify(json.data)}`);
+    }
+  });
+
   // 12. Verification: Removed Valuation Endpoints Return 404
   await test('CONFIRM 404: POST /api/valuation/instant returns 404 Not Found', async () => {
     const res = await fetch(`${BASE_URL}/valuation/instant`, {
