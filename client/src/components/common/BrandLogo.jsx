@@ -4,7 +4,11 @@ export default function BrandLogo({ variant = 'default', className = '' }) {
   const isWhite = variant === 'white';
 
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
+    <div 
+      dir="ltr" 
+      className={`flex flex-row items-center gap-2.5 select-none ${className}`}
+      style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
+    >
       {/* Modern Architectural Icon Badge */}
       <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl transition-transform duration-300 group-hover:scale-105 shadow-sm ${
         isWhite 
@@ -39,8 +43,12 @@ export default function BrandLogo({ variant = 'default', className = '' }) {
         </span>
       </div>
 
-      {/* Typography: ONLY AQAR IN */}
-      <div className="flex items-center gap-1.5 leading-none">
+      {/* Typography: STRICTLY AQAR IN */}
+      <div 
+        dir="ltr" 
+        className="flex flex-row items-center gap-1.5 leading-none"
+        style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
+      >
         <span className={`text-xl sm:text-2xl font-black tracking-tight ${
           isWhite ? 'text-white' : 'text-[#0B1C3D]'
         }`}>
