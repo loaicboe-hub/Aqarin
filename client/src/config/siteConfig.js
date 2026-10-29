@@ -9,9 +9,9 @@ export const SITE_CONFIG = {
   
   // Official Hotlines & Support Contacts
   phone: '+201004491026',
-  phoneDisplay: '+20 100 449 1026',
+  phoneDisplay: '\u200E+20 100 449 1026',
   whatsappNumber: '201004491026',
-  whatsappDisplay: '+20 100 449 1026',
+  whatsappDisplay: '\u200E+20 100 449 1026',
   email: 'contact@aqaarin.com',
   supportEmail: 'support@aqaarin.com',
   adminEmail: 'm.khaled27091990@gmail.com',

@@ -18,7 +18,9 @@ export default function FloatingWhatsApp() {
         }`}
       >
         <span>{isRTL ? 'تحدث مع مستشارك العقاري' : 'Chat with Real Estate Advisor'}</span>
-        <span className="font-mono text-emerald-400 font-bold">0100 449 1026</span>
+        <span className="font-mono text-emerald-400 font-bold" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+          0100 449 1026
+        </span>
       </span>
 
       {/* Floating WhatsApp Action Button */}

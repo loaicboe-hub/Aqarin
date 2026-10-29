@@ -39,8 +39,15 @@ export default function Footer() {
 
             <div className="space-y-1.5 text-xs text-slate-500 pt-1">
               <p className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-sky-600" />
-                <a href={`tel:${SITE_CONFIG.phone}`} className="font-mono hover:text-sky-700">{SITE_CONFIG.phoneDisplay}</a>
+                <Phone className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                <a 
+                  href={`tel:${SITE_CONFIG.phone}`} 
+                  dir="ltr" 
+                  className="font-mono hover:text-sky-700 inline-block text-left"
+                  style={{ unicodeBidi: 'isolate' }}
+                >
+                  {SITE_CONFIG.phoneDisplay}
+                </a>
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-sky-600" />

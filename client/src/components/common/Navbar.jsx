@@ -289,7 +289,7 @@ export default function Navbar() {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>{isRTL ? 'تواصل معنا واتساب' : 'WhatsApp Support'}</span>
               </div>
-              <span className="font-mono text-xs" dir="ltr">{SITE_CONFIG.phoneDisplay}</span>
+              <span className="font-mono text-xs" dir="ltr" style={{ unicodeBidi: 'isolate' }}>{SITE_CONFIG.phoneDisplay}</span>
             </a>
           </div>
         </div>
