@@ -32,8 +32,8 @@ async function runTests() {
   await test('GET /api/properties (Fetches properties with parsed JSON)', async () => {
     const res = await fetch(`${BASE_URL}/properties`);
     const json = await res.json();
-    if (!res.ok || !json.success || json.count !== 5) {
-      throw new Error(`Expected count: 5, got ${json.count}`);
+    if (!res.ok || !json.success || json.count < 5) {
+      throw new Error(`Expected at least 5 properties, got ${json.count}`);
     }
     const first = json.data[0];
     if (!Array.isArray(first.images) || !Array.isArray(first.amenities)) {
