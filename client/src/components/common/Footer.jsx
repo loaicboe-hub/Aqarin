@@ -100,11 +100,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/help-me-choose" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'اختبار مساعدة الاختيار' : 'Help Me Choose AI'}
-                </Link>
-              </li>
-              <li>
                 <Link to="/selling-checklist" className="hover:text-sky-600 transition-colors font-medium">
                   {isRTL ? 'قائمة فحص البائعين' : 'Seller Due Diligence'}
                 </Link>

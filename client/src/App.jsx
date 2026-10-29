@@ -9,7 +9,6 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import AddPropertyPage from './pages/AddPropertyPage';
-import HelpMeChoosePage from './pages/HelpMeChoosePage';
 import SellingChecklistPage from './pages/SellingChecklistPage';
 import PartnersApplyPage from './pages/PartnersApplyPage';
 import { SignInPage, SignUpPage, ForgotPasswordPage } from './pages/AuthPages';
@@ -61,7 +60,6 @@ export default function App() {
           <Route path="/property-submitted" element={<PropertyDetailsPage />} />
 
           {/* Decision Support Tools */}
-          <Route path="/help-me-choose" element={<HelpMeChoosePage />} />
           <Route path="/selling-checklist" element={<SellingChecklistPage />} />
           <Route path="/partners/apply" element={<PartnersApplyPage />} />
 

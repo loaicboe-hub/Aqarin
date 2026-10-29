@@ -150,7 +150,7 @@ export default function FastBuyPage() {
           </div>
 
           <Link
-            to="/help-me-choose"
+            to="/buy"
             className="px-6 py-3.5 rounded-full bg-white text-[#0B1C3D] hover:bg-slate-100 font-bold text-xs shrink-0 shadow-md transition-all flex items-center gap-2"
           >
             <span>{isRTL ? 'طلب صفقة مخصصة' : 'Request Custom Deal'}</span>

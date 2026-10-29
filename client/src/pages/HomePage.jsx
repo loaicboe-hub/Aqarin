@@ -330,30 +330,29 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Card 2: AI Property Search */}
+          {/* Card 2: Verified Listings & Compounds */}
           <Link
-            to="/help-me-choose"
+            to="/buy"
             className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 group text-left"
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
                 src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=600&q=80"
-                alt="AI Property Search"
+                alt="Verified Listings"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             <div className="flex-1 space-y-2">
               <h3 className="text-lg sm:text-xl font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors">
-                {isRTL ? 'البحث الذكي بالذكاء الاصطناعي' : 'AI Property Search'}
+                {isRTL ? 'عقارات موثقة للبيع والإيجار' : 'Verified Properties & Communities'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 {isRTL 
-                  ? 'صف ما تبحث عنه باللغة الطبيعية ودع الذكاء الاصطناعي يجد العقار والمشروع المثالي لك.'
-                  : "Describe what you're looking for in natural language and let AI find the perfect match."}
+                  ? 'استكشف وحدات وفلل فاخرة موثقة في أرقى كمبوندات التجمع الخامس، الشيخ زايد والعاصمة الإدارية.'
+                  : 'Explore verified luxury villas, apartments, and duplexes across Egypt’s premier compounds.'}
               </p>
-              <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-500 group-hover:text-sky-600 transition-colors pt-1">
-                <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-                <span>{isRTL ? 'استكشف البحث الذكي' : 'AI Search available'}</span>
+              <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors pt-1">
+                <span>{isRTL ? 'تصفح العقارات المتاحة' : 'Browse Available Properties'}</span>
                 <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
               </div>
             </div>
@@ -572,9 +571,8 @@ export default function HomePage() {
       </section>
 
       {/* ==========================================================
-          6. FLOATING ACTION BUTTONS (Exact Match to Image)
-          - Green WhatsApp Button
-          - "✨ Ask AI" Pill Button
+          6. FLOATING ACTION BUTTON
+          - WhatsApp Floating Button
       ========================================================== */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
         
@@ -588,16 +586,6 @@ export default function HomePage() {
         >
           <MessageSquareShare className="w-6 h-6" />
         </a>
-
-        {/* "✨ Ask AI" Floating Pill Button */}
-        <Link
-          to="/help-me-choose"
-          className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-[#0B1C3D] font-bold text-xs shadow-xl border border-slate-200 flex items-center gap-1.5 transition-transform hover:scale-105"
-        >
-          <Sparkles className="w-4 h-4 text-sky-500" />
-          <span>Ask AI</span>
-        </Link>
-
       </div>
 
     </div>
