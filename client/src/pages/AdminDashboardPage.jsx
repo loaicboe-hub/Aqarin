@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [location.pathname]);
 
   const handleSaveBenchmark = async (id) => {
     setSavingId(id);
