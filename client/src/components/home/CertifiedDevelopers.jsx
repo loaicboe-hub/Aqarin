@@ -26,8 +26,8 @@ export default function CertifiedDevelopers() {
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
               {isRTL 
-                ? 'استكشف وحدات وكمبوندات موثقة من أكبر 16 مطور عقاري في مصر بخطط سداد تصل إلى 10 سنوات وبدون عمولة.'
-                : 'Explore verified primary communities and developer units across 16 top developers with up to 10Y installments.'}
+                ? `استكشف وحدات وكمبوندات موثقة من أكبر ${MASTER_DEVELOPERS.length} مطور عقاري في مصر بخطط سداد تصل إلى 10 سنوات وبدون عمولة.`
+                : `Explore verified primary communities and developer units across ${MASTER_DEVELOPERS.length} top developers with up to 10Y installments.`}
             </p>
           </div>
 
@@ -35,7 +35,7 @@ export default function CertifiedDevelopers() {
             to="/developers"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] hover:text-sky-600 transition-colors"
           >
-            <span>{isRTL ? 'دليل كافة المطورين (16)' : 'View All Developers Directory (16)'}</span>
+            <span>{isRTL ? `دليل كافة المطورين (${MASTER_DEVELOPERS.length})` : `View All Developers Directory (${MASTER_DEVELOPERS.length})`}</span>
             <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
           </Link>
         </div>
@@ -50,8 +50,14 @@ export default function CertifiedDevelopers() {
             >
               <div className="space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#0B1C3D] text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
-                    {dev.nameEn.charAt(0)}
+                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform overflow-hidden">
+                    {dev.logo ? (
+                      <img src={dev.logo} alt={dev.nameEn} className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full rounded-lg bg-[#0B1C3D] text-white flex items-center justify-center font-black text-sm">
+                        {dev.nameEn.charAt(0)}
+                      </div>
+                    )}
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                     {isRTL ? dev.badgeAr : dev.badgeEn}

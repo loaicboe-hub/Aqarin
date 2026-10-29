@@ -17,296 +17,37 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { SITE_CONFIG } from '../config/siteConfig';
 
-export const MASTER_DEVELOPERS = [
-  {
-    id: 'emaar',
-    nameAr: 'إعمار مصر',
-    nameEn: 'Emaar Misr',
-    badgeAr: 'مطور معتمد فئة أ • عالمي',
-    badgeEn: 'Grade-A Global Master Developer',
-    established: '1997',
-    region: 'new_cairo',
-    regionAr: 'القاهرة الجديدة والساحل',
-    regionEn: 'New Cairo & North Coast',
-    projectsAr: ['ميفيدا', 'مراسي', 'أبتاون كايرو', 'كايرو جيت', 'سول'],
-    projectsEn: ['Mivida', 'Marassi', 'Uptown Cairo', 'Cairo Gate', 'Soul'],
-    searchKey: 'Mivida',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'رائد المشروعات العمرانية المتكاملة الفاخرة ووجهات الحياة العصرية في التجمع الخامس والساحل الشمالي.',
-    descriptionEn: 'World-renowned master developer behind Egypt’s most iconic communities in New Cairo and North Coast.'
-  },
-  {
-    id: 'sodic',
-    nameAr: 'سوديك العقارية',
-    nameEn: 'SODIC Developments',
-    badgeAr: 'رائد المجتمعات الراقية',
-    badgeEn: 'Integrated Living Pioneer',
-    established: '1996',
-    region: 'zayed_october',
-    regionAr: 'الشيخ زايد والتجمع والساحل',
-    regionEn: 'Sheikh Zayed, New Cairo & Sahel',
-    projectsAr: ['أليجريا', 'فيليت', 'كارميل', 'فاي زايد', 'جون رأس الحكمة', 'إيست تاون'],
-    projectsEn: ['Allegria', 'Villette', 'Karmell', 'VYE Sodic', 'June Ras El Hekma', 'Eastown'],
-    searchKey: 'Allegria',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'أحد أكبر المطورين العقاريين في مصر برصيد أكثر من 28 عاماً من الابتكار في غرب وشرق القاهرة والساحل.',
-    descriptionEn: 'Over 28 years of award-winning master development spanning West Cairo, East Cairo, and North Coast.'
-  },
-  {
-    id: 'palmhills',
-    nameAr: 'بالم هيلز للتعمير',
-    nameEn: 'Palm Hills Developments',
-    badgeAr: 'أكبر محفظة مجتمعات سكنية',
-    badgeEn: 'Leading Residential Portfolio',
-    established: '2005',
-    region: 'zayed_october',
-    regionAr: 'أكتوبر والتجمع والساحل',
-    regionEn: 'October, New Cairo & Sahel',
-    projectsAr: ['باديا', 'بالم هيلز أكتوبر', 'بالم هيلز نيو كايرو', 'هاسيندا باي', 'هاسيندا ووترز'],
-    projectsEn: ['Badya', 'Palm Hills October', 'Palm Hills New Cairo', 'Hacienda Bay', 'Hacienda Waters'],
-    searchKey: 'Palm Hills',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'المطور الرائد لأول مدينة ذكية مستدامة بالكامل (باديا) وأفخم المنتجعات الساحلية على البحر المتوسط.',
-    descriptionEn: 'Pioneering sustainable smart cities (Badya) and Egypt’s premier Mediterranean coastal resorts.'
-  },
-  {
-    id: 'mountainview',
-    nameAr: 'ماونتن فيو (DMG)',
-    nameEn: 'Mountain View (DMG)',
-    badgeAr: 'رواد سعادة العيش واللاجون',
-    badgeEn: 'Happiness & Lagoon Innovation',
-    established: '2005',
-    region: 'new_cairo',
-    regionAr: 'القاهرة الجديدة وأكتوبر ورأس الحكمة',
-    regionEn: 'New Cairo, October & Ras El Hekma',
-    projectsAr: ['آي سيتي التجمع', 'آي سيتي أكتوبر', 'ماونتن فيو رأس الحكمة', 'ليفيلز', 'بلاج سيدي عبد الرحمن'],
-    projectsEn: ['iCity New Cairo', 'iCity October', 'MV Ras El Hekma', 'LVLS', 'Plage Sidi Abdel Rahman'],
-    searchKey: 'Mountain View',
-    downPayment: '10%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'مبتكر مفهوم "آي فيلا" وبحيرات الكريستال لاجون ومجتمعات السعادة الأسرية المتكاملة في مصر.',
-    descriptionEn: 'Renowned for the patented iVilla concept, turquoise swimmable lagoons, and family-centric communities.'
-  },
-  {
-    id: 'ora',
-    nameAr: 'أورا للتطوير (ساويرس)',
-    nameEn: 'Ora Developers (Sawiris)',
-    badgeAr: 'أبراج عالمية فاخرة',
-    badgeEn: 'Ultra-Luxury Towers & Destinations',
-    established: '2016',
-    region: 'new_cairo',
-    regionAr: 'الشيخ زايد والتجمع والساحل',
-    regionEn: 'Sheikh Zayed, New Cairo & North Coast',
-    projectsAr: ['أبراج زيد الشيخ زايد', 'زيد إيست التجمع', 'سيلفرساندز الساحل', 'سولانا زايد'],
-    projectsEn: ['Zed Towers Zayed', 'Zed East New Cairo', 'Silversands Sahel', 'Solana Zayed'],
-    searchKey: 'Zed',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'بقيادة المهندس نجيب ساويرس، تقدم أورا معايير معمارية عالمية ووجهات فندقية وترفيهية غير مسبوقة.',
-    descriptionEn: 'Led by Naguib Sawiris, delivering international luxury hospitality, park living, and high-rise living.'
-  },
-  {
-    id: 'tmg',
-    nameAr: 'مجموعة طلعت مصطفى (TMG)',
-    nameEn: 'Talaat Moustafa Group',
-    badgeAr: 'أكبر مطور مدن ذكية متكاملة',
-    badgeEn: 'Largest Smart City Master Builder',
-    established: '1970',
-    region: 'north_coast',
-    regionAr: 'القاهرة والساحل الشمالي والعاصمة',
-    regionEn: 'Cairo, North Coast & Capital',
-    projectsAr: ['ساوث ميد الساحل', 'مدينتي', 'الرحاب', 'نور سيتي', 'سيليا العاصمة'],
-    projectsEn: ['SouthMED Sahel', 'Madinaty', 'Al Rehab', 'Noor City', 'Celia Capital'],
-    searchKey: 'Madinaty',
-    downPayment: '5%',
-    maxYears: '10 سنوات',
-    descriptionAr: 'الصرح العقاري الأكبر في الشرق الأوسط ومطور المدن المليونية المتكاملة بمساحات تتجاوز 74 مليون م².',
-    descriptionEn: 'The Middle East’s leading master builder of fully autonomous mega-cities with over 74 million sqm developed.'
-  },
-  {
-    id: 'hassanallam',
-    nameAr: 'حسن علام العقارية',
-    nameEn: 'Hassan Allam Properties',
-    badgeAr: 'تراث معماري وهندسي عريق',
-    badgeEn: 'Heritage Architecture & Engineering',
-    established: '1936',
-    region: 'new_cairo',
-    regionAr: 'التجمع وزايد والجونة والمستقبل',
-    regionEn: 'New Cairo, Zayed, Gouna & Mostakbal',
-    projectsAr: ['سوان ليك التجمع', 'سوان ليك ويست', 'هاب تاون المستقبل', 'سوان ليك الجونة', 'ليتل فينيس'],
-    projectsEn: ['SwanLake Residences', 'SwanLake West', 'HAPTown Mostakbal', 'SwanLake Gouna', 'Little Venice'],
-    searchKey: 'SwanLake',
-    downPayment: '10%',
-    maxYears: '7 سنوات',
-    descriptionAr: 'إرث يمتد لنحو 90 عاماً من الريادة الإنشائية والتطوير الفاخر لأرقى القصور والفيلات السكنية.',
-    descriptionEn: 'Nine decades of construction excellence and luxury residential community development.'
-  },
-  {
-    id: 'tatweermisr',
-    nameAr: 'تطوير مصر',
-    nameEn: 'Tatweer Misr',
-    badgeAr: 'أيقونة المشروعات الساحلية',
-    badgeEn: 'Iconic Coastal & City Living',
-    established: '2014',
-    region: 'north_coast',
-    regionAr: 'السخنة والساحل والمستقبل وزايد',
-    regionEn: 'Sokhna, Sahel, Mostakbal & Zayed',
-    projectsAr: ['المونت جلالة السخنة', 'فوكا باي', 'سولت رأس الحكمة', 'بلومفيلدز المستقبل', 'دي أو إس إي'],
-    projectsEn: ['Il Monte Galala', 'Fouka Bay', 'Salt Ras El Hekma', 'Bloomfields Mostakbal', 'D.O.S.E'],
-    searchKey: 'Monte Galala',
-    downPayment: '5%',
-    maxYears: '9 سنوات',
-    descriptionAr: 'رواد الهندسة الجبلية والشاطئية والتعليم المتطور في مصر من خلال مشروعاتها الحائزة على جوائز دولية.',
-    descriptionEn: 'Award-winning master planner known for cliffside Red Sea architecture, beachfront resorts, and education hubs.'
-  },
-  {
-    id: 'misritalia',
-    nameAr: 'مصر إيطاليا العقارية',
-    nameEn: 'Misr Italia Properties',
-    badgeAr: 'رواد العاصمة ورأس الحكمة',
-    badgeEn: 'Capital & Coastal Trailblazer',
-    established: '1998',
-    region: 'capital',
-    regionAr: 'العاصمة الإدارية ورأس الحكمة والمستقبل',
-    regionEn: 'New Capital, Ras El Hekma & Mostakbal',
-    projectsAr: ['إل بوسكو العاصمة', 'فينشي العاصمة', 'سولاري رأس الحكمة', 'إل بوسكو سيتي', 'كاي السخنة'],
-    projectsEn: ['IL Bosco Capital', 'Vinci Capital', 'Solare Ras El Hekma', 'IL Bosco City', 'Kai Sokhna'],
-    searchKey: 'Bosco',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'أكبر مطور بالقطاع الخاص في العاصمة الإدارية وصاحب أول مشروع غابة عمودية خضراء في مصر.',
-    descriptionEn: 'The leading private developer in the New Capital, introducing vertical forest architecture to Egypt.'
-  },
-  {
-    id: 'waterway',
-    nameAr: 'ذا ووتر واي للتطوير العقاري',
-    nameEn: 'The Waterway Developments',
-    badgeAr: 'أيقونة الرفاهية والخدمات الفندقية',
-    badgeEn: 'Ultra-Luxury Boutique Living',
-    established: '2010',
-    region: 'new_cairo',
-    regionAr: 'القاهرة الجديدة والساحل والعاصمة',
-    regionEn: 'New Cairo, Sahel & New Capital',
-    projectsAr: ['ذا ووتر واي التجمع', 'ووتر واي الساحل', 'ذا كابيتال واي', 'ذا فيو التجمع', 'دبليو بي آر'],
-    projectsEn: ['The Waterway New Cairo', 'Waterway Sahel', 'The Capitalway', 'The View', 'WPR'],
-    searchKey: 'Waterway',
-    downPayment: '10%',
-    maxYears: '6 سنوات',
-    descriptionAr: 'الاسم المرادف لأفخم أسلوب حياة فندقي ومجمعات الأعمال والوحدات السكنية الحصرية في مصر.',
-    descriptionEn: 'Synonymous with ultra-luxury residential living, cascading water features, and prime commercial hubs.'
-  },
-  {
-    id: 'hydepark',
-    nameAr: 'هايد بارك للتطوير العقاري',
-    nameEn: 'Hyde Park Developments',
-    badgeAr: 'أكبر سنترال بارك في التجمع',
-    badgeEn: 'Central Park Living Champion',
-    established: '2007',
-    region: 'new_cairo',
-    regionAr: 'القاهرة الجديدة وأكتوبر ورأس الحكمة',
-    regionEn: 'New Cairo, October & Ras El Hekma',
-    projectsAr: ['هايد بارك التجمع', 'سي شور رأس الحكمة', 'جاردن ليكس أكتوبر', 'تاوني أكتوبر'],
-    projectsEn: ['Hyde Park New Cairo', 'Seashore Ras El Hekma', 'Garden Lakes', 'Tawny October'],
-    searchKey: 'Hyde Park',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'يحتضن أكبر حديقة مركزية خاصة بمساحة 141 فداناً في التجمع الخامس مع نوادي رياضية دولية.',
-    descriptionEn: 'Home to the largest 141-acre central park in New Cairo with Arsenal soccer school and premier living.'
-  },
-  {
-    id: 'cityedge',
-    nameAr: 'سيتي إيدج العقارية',
-    nameEn: 'City Edge Developments',
-    badgeAr: 'المطور الوطني للأبراج والأيقونات',
-    badgeEn: 'National Icon & High-Rise Developer',
-    established: '2017',
-    region: 'north_coast',
-    regionAr: 'العلمين الجديدة والعاصمة وماسبيرو',
-    regionEn: 'New Alamein, Capital & Maspero',
-    projectsAr: ['أبراج نورث إيدج العلمين', 'داون تاون العلمين', 'أبراج ماسبيرو', 'المقصد العاصمة', 'زاهية المنصورة'],
-    projectsEn: ['North Edge Towers Alamein', 'Downtown Alamein', 'Maspero Towers', 'Al Maqsad', 'Zahya'],
-    searchKey: 'North Edge Towers',
-    downPayment: '10%',
-    maxYears: '7 سنوات',
-    descriptionAr: 'الشراكة الرائدة مع هيئة المجتمعات العمرانية لتشييد أول ناطحات سحاب فندقية على البحر في العلمين.',
-    descriptionEn: 'Flagship partnership with NUCA developing Egypt’s first beachfront high-rise towers in New Alamein.'
-  },
-  {
-    id: 'madinetmasr',
-    nameAr: 'مدينة مصر للإسكان والتعمير',
-    nameEn: 'Madinet Masr (MNHD)',
-    badgeAr: 'خبرة عريقة منذ 1959',
-    badgeEn: 'Legacy Pioneer Since 1959',
-    established: '1959',
-    region: 'new_cairo',
-    regionAr: 'القاهرة الجديدة وطريق السويس',
-    regionEn: 'New Cairo & Suez Road',
-    projectsAr: ['تاج سيتي', 'سراي', 'زهو أسيوط', 'كافانا'],
-    projectsEn: ['Taj City', 'Sarai', 'Zaho Assiut', 'Cavana'],
-    searchKey: 'Taj City',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'أعرق شركة تعمير في مصر بخبرة 65 عاماً، وتطور حالياً مدينتي تاج سيتي وسراي بمساحات تتجاوز 9 ملايين م².',
-    descriptionEn: '65 years of urban development, transforming 9M+ sqm across Taj City and Sarai on Suez Road.'
-  },
-  {
-    id: 'sabbour',
-    nameAr: 'الأهلي صبور للتطوير العقاري',
-    nameEn: 'Al Ahly Sabbour',
-    badgeAr: 'صناع الثقة والمنتجعات',
-    badgeEn: 'Trusted Resort & Urban Master',
-    established: '1994',
-    region: 'north_coast',
-    regionAr: 'المستقبل والساحل وأكتوبر',
-    regionEn: 'Mostakbal City, Sahel & October',
-    projectsAr: ['جايا رأس الحكمة', 'أمواج الساحل', 'سيتي أوف أوديسيا', 'كيفا 6 أكتوبر', 'جرين سكوير'],
-    projectsEn: ['Gaia Ras El Hekma', 'Amwaj Sahel', 'The City of Odyssia', 'Keeva October', 'Green Square'],
-    searchKey: 'Gaia',
-    downPayment: '5%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'شراكة قوية بين عائلة صبور والبنك الأهلي المصري تضم أكثر من 60 مشروعاً سكنياً وتجارياً وساحلياً.',
-    descriptionEn: 'Strategic partnership with the National Bank of Egypt with over 60 premier residential & resort communities.'
-  },
-  {
-    id: 'lavista',
-    nameAr: 'لافيستا للتطوير العقاري',
-    nameEn: 'La Vista Developments',
-    badgeAr: 'عنوان الخصوصية والتشطيب الفاخر',
-    badgeEn: 'Unmatched Privacy & Craftsmanship',
-    established: '1991',
-    region: 'capital',
-    regionAr: 'الساحل والعاصمة والسخنة والتجمع',
-    regionEn: 'Sahel, Capital, Sokhna & New Cairo',
-    projectsAr: ['لافيستا سيتي العاصمة', 'لافيستا باي الساحل', 'لافيستا رأس الحكمة', 'الباتيـو أورو', 'لافيستا راي'],
-    projectsEn: ['La Vista City Capital', 'La Vista Bay', 'La Vista Ras El Hekma', 'El Patio Oro', 'La Vista Ray'],
-    searchKey: 'La Vista City',
-    downPayment: '10%',
-    maxYears: '7 سنوات',
-    descriptionAr: 'المعيار الذهبي للجودة العالية واللاندسكيب الرائع والالتزام التاريخي بمواعيد التسليم الدقيقة.',
-    descriptionEn: 'The benchmark for meticulous landscape design, privacy, and flawless construction delivery standards.'
-  },
-  {
-    id: 'madaar',
-    nameAr: 'مدار للتطوير العقاري',
-    nameEn: 'Madaar Development',
-    badgeAr: 'رواد الفخامة الساحلية',
-    badgeEn: 'Boutique Coastal Luxury',
-    established: '2015',
-    region: 'red_sea',
-    regionAr: 'العين السخنة ورأس الحكمة',
-    regionEn: 'Ain Sokhna & Ras El Hekma',
-    projectsAr: ['أزها العين السخنة', 'أزها رأس الحكمة', 'نورد العلمين'],
-    projectsEn: ['Azha Ain Sokhna', 'Azha Ras El Hekma', 'Nord Alamein'],
-    searchKey: 'Azha',
-    downPayment: '10%',
-    maxYears: '8 سنوات',
-    descriptionAr: 'المطور لمشروع أزها السخنة ورأس الحكمة بمفاهيم التصميم العصري والبحيرات المفتوحة والخدمات الفندقية.',
-    descriptionEn: 'Master developer of Azha Sokhna & Ras El Hekma, delivering turquoise lagoons and 5-star beachfront living.'
-  }
-];
+import rawNawyDevelopers from '../data/nawyDevelopers.json';
+
+// Handcrafted enhancements for top tier master developers
+const ENHANCEMENTS = {
+  sodic: { established: '1996', badgeAr: 'رائد المجتمعات الراقية فئة أ', badgeEn: 'Integrated Living Pioneer Grade-A' },
+  emaar_misr: { established: '1997', badgeAr: 'مطور معتمد فئة أ • عالمي', badgeEn: 'Grade-A Global Master Developer' },
+  palm_hills_developments: { established: '2005', badgeAr: 'أكبر محفظة مجتمعات سكنية', badgeEn: 'Leading Residential Portfolio' },
+  mountain_view: { established: '2005', badgeAr: 'رواد سعادة العيش واللاجون', badgeEn: 'Happiness & Lagoon Innovation' },
+  ora_developers: { established: '2016', badgeAr: 'أبراج عالمية فاخرة • ساويرس', badgeEn: 'Ultra-Luxury Towers & Destinations' },
+  hassan_allam_properties: { established: '1936', badgeAr: 'أعرق صرح عمراني مصري', badgeEn: 'Heritage & Legacy Builder' },
+  tatweer_misr: { established: '2014', badgeAr: 'أيقونة المشروعات الجبلية والساحلية', badgeEn: 'Iconic Coastal & Mountain Living' },
+  misr_italia_properties: { established: '1998', badgeAr: 'رواد الفكر الإيطالي المعاصر', badgeEn: 'Contemporary Italian Master Living' },
+  talaat_moustafa_group__tmg_: { established: '1970', badgeAr: 'رائد المدن الذكية المليونية', badgeEn: 'Smart Megacity Master Developer' },
+  the_waterway_developments: { established: '2008', badgeAr: 'عنوان الفخامة والرقي', badgeEn: 'Boutique Luxury Excellence' },
+  hyde_park: { established: '2007', badgeAr: 'واحة الطبيعة والحدائق الكبرى', badgeEn: 'Green Sanctuary & Large Parks' },
+  city_edge_developments: { established: '2017', badgeAr: 'المطور الوطني لأبراج العلمين', badgeEn: 'National Icon & Skyscraper Pioneer' },
+  madinet_masr: { established: '1959', badgeAr: 'تاريخ عريق ورؤية مستقبلية', badgeEn: '65+ Years of Urban Excellence' },
+  al_ahly_sabbour_developments: { established: '1994', badgeAr: 'أعرق استشارات وتطوير عقاري', badgeEn: 'Pioneer Engineering & Development' },
+  la_vista_developments: { established: '1991', badgeAr: 'منتجعات شاطئية وبوتيك كومباوندز', badgeEn: 'Premier Coastal & Patio Resorts' },
+  madaar_development: { established: '2015', badgeAr: 'وجهات شاطئية وبحيرات ساحرة', badgeEn: 'Waterfront Innovation & Lagoons' }
+};
+
+export const MASTER_DEVELOPERS = rawNawyDevelopers.map(dev => {
+  const enh = ENHANCEMENTS[dev.id] || {};
+  return {
+    ...dev,
+    established: enh.established || dev.established || '2010',
+    badgeAr: enh.badgeAr || dev.badgeAr,
+    badgeEn: enh.badgeEn || dev.badgeEn
+  };
+});
 
 export default function DevelopersPage() {
   const { isRTL } = useLanguage();
@@ -314,7 +55,7 @@ export default function DevelopersPage() {
   const [selectedRegion, setSelectedRegion] = useState('all');
 
   const regions = [
-    { id: 'all', nameAr: 'كل المطورين (16)', nameEn: 'All Developers (16)' },
+    { id: 'all', nameAr: `كل المطورين (${MASTER_DEVELOPERS.length})`, nameEn: `All Developers (${MASTER_DEVELOPERS.length})` },
     { id: 'new_cairo', nameAr: 'القاهرة الجديدة والمستقبل', nameEn: 'New Cairo & Mostakbal' },
     { id: 'zayed_october', nameAr: 'الشيخ زايد و 6 أكتوبر', nameEn: 'Zayed & 6th October' },
     { id: 'north_coast', nameAr: 'الساحل الشمالي ورأس الحكمة', nameEn: 'North Coast & Ras El Hekma' },
@@ -362,11 +103,11 @@ export default function DevelopersPage() {
           {/* Quick Stats Badges */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 max-w-3xl mx-auto">
             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl">
-              <p className="text-2xl font-black text-amber-400">16+</p>
+              <p className="text-2xl font-black text-amber-400">{MASTER_DEVELOPERS.length}+</p>
               <p className="text-[11px] text-slate-300 font-semibold">{isRTL ? 'مطور فئة أ معتمد' : 'Grade-A Developers'}</p>
             </div>
             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl">
-              <p className="text-2xl font-black text-sky-400">80+</p>
+              <p className="text-2xl font-black text-sky-400">460+</p>
               <p className="text-[11px] text-slate-300 font-semibold">{isRTL ? 'كمبوند ومدينة متكاملة' : 'Master Communities'}</p>
             </div>
             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-3 rounded-2xl">
@@ -436,8 +177,14 @@ export default function DevelopersPage() {
                 
                 {/* Card Top: Logo & Badge */}
                 <div className="flex items-start justify-between gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-[#0B1C3D] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
-                    {dev.nameEn.charAt(0)}
+                  <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200/80 p-1.5 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+                    {dev.logo ? (
+                      <img src={dev.logo} alt={dev.nameEn} className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full rounded-xl bg-[#0B1C3D] text-white flex items-center justify-center font-black text-xl">
+                        {dev.nameEn.charAt(0)}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80">

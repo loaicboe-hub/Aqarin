@@ -1,6 +1,7 @@
 // ==========================================================
 // AQAR IN (عقار إن) - Mock Data & Real-Estate Knowledge Base
 // ==========================================================
+import primaryProperties from './primaryProperties.json';
 
 export const EGYPT_LOCATIONS = [
   {
@@ -44,7 +45,7 @@ export const EGYPT_LOCATIONS = [
   }
 ];
 
-export const INITIAL_PROPERTIES = [
+const BASE_PROPERTIES = [
   {
     id: 1,
     titleEn: 'Luxury 3BR Apartment with Lagoon View in Mivida',
@@ -863,6 +864,8 @@ export const INITIAL_PROPERTIES = [
     owner: { name: 'Madaar Development', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   }
 ];
+
+export const INITIAL_PROPERTIES = [...BASE_PROPERTIES, ...primaryProperties];
 
 export const EGYPT_BANKS = [
   {

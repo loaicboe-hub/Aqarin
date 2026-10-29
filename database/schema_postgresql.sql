@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS properties (
   city VARCHAR(100) NOT NULL,
   district VARCHAR(100) NOT NULL,
   compound VARCHAR(150) NULL,
+  developer VARCHAR(150) NULL,
   address VARCHAR(255) NULL,
   lat NUMERIC(10, 7) NOT NULL,
   lng NUMERIC(10, 7) NOT NULL,

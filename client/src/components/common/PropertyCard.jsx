@@ -62,6 +62,12 @@ export default function PropertyCard({ property }) {
                 {isRTL ? 'استلام فوري' : 'Ready'}
               </span>
             )}
+
+            {property.developer && (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm bg-white/95 text-[#0B1C3D] backdrop-blur-md border border-slate-200/60 truncate max-w-[130px]">
+                {property.developer}
+              </span>
+            )}
           </div>
 
           <button

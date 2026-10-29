@@ -31,6 +31,7 @@ function formatPropertyRow(p) {
     aqarScore: Number(p.aqar_score),
     viewsCount: Number(p.views_count),
     price: Number(p.price),
+    developer: p.developer || null,
     images: normalizeJson(p.images_json),
     amenities: normalizeJson(p.amenities_json)
   };
@@ -46,6 +47,7 @@ router.get('/', async (req, res) => {
       city,
       district,
       compound,
+      developer,
       minPrice,
       maxPrice,
       minArea,
@@ -95,6 +97,10 @@ router.get('/', async (req, res) => {
       query += ` AND compound ILIKE $${pIdx++}`;
       params.push(`%${compound}%`);
     }
+    if (developer && developer !== 'all') {
+      query += ` AND developer ILIKE $${pIdx++}`;
+      params.push(`%${developer}%`);
+    }
     if (minPrice) {
       query += ` AND price >= $${pIdx++}`;
       params.push(Number(minPrice));
@@ -128,7 +134,7 @@ router.get('/', async (req, res) => {
       params.push(paymentType);
     }
     if (search) {
-      query += ` AND (title_en ILIKE $${pIdx} OR title_ar ILIKE $${pIdx} OR district ILIKE $${pIdx} OR compound ILIKE $${pIdx} OR city ILIKE $${pIdx})`;
+      query += ` AND (title_en ILIKE $${pIdx} OR title_ar ILIKE $${pIdx} OR district ILIKE $${pIdx} OR compound ILIKE $${pIdx} OR developer ILIKE $${pIdx} OR city ILIKE $${pIdx})`;
       params.push(`%${search}%`);
       pIdx++;
     }
