@@ -113,9 +113,9 @@ export default function ExchangePage() {
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
             {isRTL ? (
-              <>بدّل عقارك بعقار آخر،<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-amber-300">بدون عمولات وبتقييم عادل للطرفين</span></>
+              <>بدّل عقارك بعقار آخر،<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-amber-300">بدون عمولات وبسعر عادل للطرفين</span></>
             ) : (
-              <>Swap Your Property for Another<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-amber-300">With Fair Valuation & Direct Legal Escrow</span></>
+              <>Swap Your Property for Another<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-amber-300">With Fair Market Pricing & Direct Legal Escrow</span></>
             )}
           </h1>
 

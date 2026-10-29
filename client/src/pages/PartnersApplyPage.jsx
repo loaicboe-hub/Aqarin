@@ -49,8 +49,8 @@ export default function PartnersApplyPage() {
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
             {isRTL 
-              ? 'فرص شراكة للمطورين العقاريين، شركات البروكريدج، مكاتب التقييم العقاري المعتمدة، والمؤسسات المصرفية.'
-              : 'Grow your real estate transactions with AI intelligence, certified leads, and integrated mortgage solutions.'}
+              ? 'فرص شراكة للمطورين العقاريين، شركات البروكريدج، ومقدمي خدمات إدارة الأملاك والتشطيب.'
+              : 'Grow your real estate transactions with AI intelligence, verified leads, and integrated management solutions.'}
           </p>
         </div>
 
@@ -66,11 +66,11 @@ export default function PartnersApplyPage() {
               <ul className="space-y-3 text-xs text-slate-600">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>{isRTL ? 'عملاء جادين موثقين يبحثون عن شراء وتمويل عقاري' : 'High-intent verified buyer & investor leads'}</span>
+                  <span>{isRTL ? 'عملاء جادين موثقين يبحثون عن شراء واستثمار عقاري' : 'High-intent verified buyer & investor leads'}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>{isRTL ? 'ربط مباشر عبر API مع نظام التقييم الذكي' : 'Direct API integration with our valuation engine'}</span>
+                  <span>{isRTL ? 'ربط مباشر عبر API مع منصة عقار إن وقاعدة البيانات الجغرافية' : 'Direct API integration with AQAR IN and geospatial database'}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -149,8 +149,8 @@ export default function PartnersApplyPage() {
                   >
                     <option value="developer">{isRTL ? 'مطور عقاري (Real Estate Developer)' : 'Real Estate Developer'}</option>
                     <option value="broker">{isRTL ? 'شركة تسويق وبروكر (Brokerage Firm)' : 'Brokerage Agency'}</option>
-                    <option value="valuer">{isRTL ? 'مكتب تقييم عقاري معتمد (Certified Appraiser)' : 'Certified Appraisal Firm'}</option>
-                    <option value="bank">{isRTL ? 'مؤسسة مالية / بنك (Financial / Bank)' : 'Financial Institution / Bank'}</option>
+                    <option value="property_manager">{isRTL ? 'شركة إدارة وتشغيل عقاري (Property Management Firm)' : 'Property Management Company'}</option>
+                    <option value="contractor">{isRTL ? 'شركة مقاولات وتشطيبات (Finishing & Contracting)' : 'Finishing & Contracting Firm'}</option>
                   </select>
                 </div>
 

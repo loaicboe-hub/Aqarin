@@ -345,11 +345,11 @@ export const SELLER_CHECKLIST = [
   },
   {
     id: 2,
-    titleEn: 'AI Valuation & Price Strategy',
-    titleAr: 'التقييم الذكي وتحديد السعر العادل',
-    descEn: 'Run an Instant AI Valuation on AQAR IN to determine your property market price per SQM based on current live market transactions.',
-    descAr: 'احسب التقييم الفوري على عقار إن (AQAR IN) لمعرفة متوسط سعر المتر الحقيقي في كمبوندك ومقارنته بالسوق الحالي.',
-    category: 'Valuation'
+    titleEn: 'Market Price Strategy & Benchmarks',
+    titleAr: 'استراتيجية التسعير ومؤشرات السوق',
+    descEn: 'Check AQAR IN live market benchmarks to price your property competitively based on current transactions in your district.',
+    descAr: 'استعن بمؤشرات أسعار المتر المربع الحية على عقار إن لتسعير عقارك بشكل تنافسي وجذاب للمشترين الجادين.',
+    category: 'Pricing'
   },
   {
     id: 3,
@@ -419,7 +419,7 @@ export const HELP_ME_CHOOSE_QUESTIONS = [
       { value: 'cash', labelEn: 'Cash (Maximum Discount)', labelAr: 'كاش مع أكبر خصم متاح' },
       { value: 'installments_short', labelEn: 'Installments (3 - 5 Years)', labelAr: 'تقسيط مريح (3 إلى 5 سنوات)' },
       { value: 'installments_long', labelEn: 'Long Installments (6 - 8+ Years)', labelAr: 'تقسيط طويل الأجل (6 إلى 8+ سنوات)' },
-      { value: 'mortgage', labelEn: 'Bank Mortgage (Up to 20 Years)', labelAr: 'تمويل عقاري بنكي حتى 20 سنة' }
+      { value: 'exchange', labelEn: 'Property Exchange & Swap', labelAr: 'تبادل عقاري واستبدال وحدة' }
     ]
   }
 ];

@@ -7,8 +7,6 @@ import { fileURLToPath } from 'url';
 import pool, { testDbConnection } from './db.js';
 import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
-import valuationRoutes from './routes/valuationRoutes.js';
-import mortgageRoutes from './routes/mortgageRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
@@ -59,8 +57,6 @@ app.get('/api/health', async (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
-app.use('/api/valuation', valuationRoutes);
-app.use('/api/mortgage', mortgageRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/services', serviceRoutes);

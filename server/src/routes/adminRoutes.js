@@ -8,8 +8,6 @@ router.get('/stats', async (req, res) => {
   try {
     const { rows: propsRows } = await pool.query('SELECT COUNT(*) as total FROM properties');
     const { rows: usersRows } = await pool.query('SELECT COUNT(*) as total FROM users');
-    const { rows: valsRows } = await pool.query('SELECT COUNT(*) as total FROM valuations');
-    const { rows: mortgagesRows } = await pool.query('SELECT COUNT(*) as total FROM mortgage_inquiries');
     const { rows: leadsRows } = await pool.query('SELECT COUNT(*) as total FROM leads_inquiries');
     const { rows: fastSellRows } = await pool.query('SELECT COUNT(*) as total FROM fast_sell_requests');
     const { rows: exchangeRows } = await pool.query('SELECT COUNT(*) as total FROM property_exchange_requests');
@@ -20,8 +18,6 @@ router.get('/stats', async (req, res) => {
       stats: {
         totalProperties: parseInt(propsRows[0].total, 10),
         totalUsers: parseInt(usersRows[0].total, 10),
-        totalValuations: parseInt(valsRows[0].total, 10),
-        totalMortgageInquiries: parseInt(mortgagesRows[0].total, 10),
         totalLeads: parseInt(leadsRows[0].total, 10),
         totalFastSellRequests: parseInt(fastSellRows[0].total, 10),
         totalExchangeRequests: parseInt(exchangeRows[0].total, 10),
@@ -75,29 +71,7 @@ router.put('/benchmarks/:id', async (req, res) => {
   }
 });
 
-// 4. Get All Valuations (Admin view)
-router.get('/valuations', async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT * FROM valuations ORDER BY id DESC LIMIT 50');
-    res.json({ success: true, count: rows.length, data: rows });
-  } catch (err) {
-    console.error('Fetch admin valuations error:', err);
-    res.status(500).json({ error: true, message: 'Failed to retrieve valuations: ' + err.message });
-  }
-});
-
-// 5. Get All Mortgage Inquiries (Admin view)
-router.get('/mortgages', async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT * FROM mortgage_inquiries ORDER BY id DESC LIMIT 50');
-    res.json({ success: true, count: rows.length, data: rows });
-  } catch (err) {
-    console.error('Fetch admin mortgages error:', err);
-    res.status(500).json({ error: true, message: 'Failed to retrieve mortgage inquiries: ' + err.message });
-  }
-});
-
-// 6. Get All Leads & Inquiries (Admin view)
+// 4. Get All Leads & Inquiries (Admin view)
 router.get('/leads', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM leads_inquiries ORDER BY id DESC LIMIT 50');

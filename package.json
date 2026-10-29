@@ -2,14 +2,14 @@
   "name": "aqarin-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "AQAR IN (عقار إن) — Egypt's Premier Smart Property & Valuation Intelligence Platform",
+  "description": "AQAR IN (عقار إن) — Egypt's Premier Smart Property Intelligence Platform",
   "scripts": {
     "dev": "npm run dev --prefix client",
     "build": "npm run build --prefix client",
     "server": "npm run dev --prefix server",
     "install:all": "npm install --prefix client && npm install --prefix server"
   },
-  "keywords": ["aqarin", "عقار-إن", "real-estate-egypt", "property-valuation", "egypt", "aqar-score", "react", "mysql", "express"],
+  "keywords": ["aqarin", "عقار-إن", "real-estate-egypt", "postgis", "postgresql", "egypt", "aqar-score", "react", "express"],
   "author": "AQAR IN Team",
   "license": "ISC"
 }

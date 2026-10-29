@@ -342,7 +342,7 @@ export default function AdminDashboardPage() {
           <p className="text-xs text-slate-500 mt-0.5">
             {isRTL 
               ? 'تعديل متوسط سعر المتر ينعكس فوراً ومباشرة في قاعدة بيانات PostgreSQL.' 
-              : 'Direct pricing benchmarks used across AI evaluation and spatial search in Egypt.'}
+              : 'Direct pricing benchmarks used across spatial search and market analytics in Egypt.'}
           </p>
         </div>
 

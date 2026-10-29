@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   Bed, 
   Bath, 
@@ -12,7 +12,6 @@ import {
   ShieldCheck, 
   Layers, 
   CheckCircle2, 
-  Landmark, 
   User,
   X
 } from 'lucide-react';
@@ -30,11 +29,6 @@ export default function PropertyDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [isFav, setIsFav] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Mortgage mini widget state
-  const [downPaymentPct, setDownPaymentPct] = useState(20);
-  const [loanYears, setLoanYears] = useState(15);
-  const [interestRate, setInterestRate] = useState(18.5);
 
   // Lead modal state
   const [leadModal, setLeadModal] = useState(false);
@@ -63,15 +57,6 @@ export default function PropertyDetailsPage() {
 
   const formatEGP = (num) => new Intl.NumberFormat(isRTL ? 'ar-EG' : 'en-EG').format(num || 0);
   const pricePerSqm = Math.round(property.price / Math.max(1, property.areaSqm));
-
-  // Mortgage calculation
-  const downPayment = Math.round(property.price * (downPaymentPct / 100));
-  const loanAmount = property.price - downPayment;
-  const monthlyRate = (interestRate / 100) / 12;
-  const totalMonths = loanYears * 12;
-  const estimatedMonthly = monthlyRate > 0
-    ? Math.round(loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1))
-    : Math.round(loanAmount / totalMonths);
 
   const handleFavorite = () => {
     const updated = toggleFavorite(property.id);
@@ -240,7 +225,7 @@ export default function PropertyDetailsPage() {
 
           </div>
 
-          {/* Right Sidebar: Contact & Mortgage */}
+          {/* Right Sidebar: Contact */}
           <div className="space-y-6 sticky top-24">
             
             {/* Contact Box */}
@@ -284,28 +269,6 @@ export default function PropertyDetailsPage() {
                   {isRTL ? 'طلب معاينة الوحدة' : 'Book Property Viewing'}
                 </button>
               </div>
-            </div>
-
-            {/* Quick Mortgage Mini Widget */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D] flex items-center gap-1.5">
-                <Landmark className="w-4 h-4 text-amber-600" />
-                <span>{isRTL ? 'حاسبة التمويل العقاري' : 'Mortgage Estimator'}</span>
-              </h3>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] text-slate-500 font-medium">{isRTL ? 'القسط الشهري التقديري' : 'Estimated Monthly Installment'}</span>
-                <p className="text-2xl font-black text-[#0B1C3D] mt-1">
-                  {formatEGP(estimatedMonthly)} <span className="text-xs text-slate-500 font-normal">EGP/mo</span>
-                </p>
-              </div>
-
-              <Link
-                to={`/mortgage/apply?price=${property.price}&propertyId=${property.id}`}
-                className="block w-full py-2.5 rounded-full bg-[#0B1C3D] hover:bg-[#122B5C] text-white font-bold text-xs text-center transition-colors"
-              >
-                {isRTL ? 'قدم على تمويل عقاري بنكي' : 'Apply for Bank Mortgage'}
-              </Link>
             </div>
 
           </div>

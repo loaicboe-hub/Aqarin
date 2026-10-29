@@ -104,8 +104,8 @@ export default function FastSellPage() {
               <div className="w-10 h-10 rounded-full bg-sky-500 text-white font-black flex items-center justify-center mx-auto text-sm">
                 2
               </div>
-              <h3 className="font-bold text-sm text-white">{isRTL ? 'تقييم وعرض كاش 48h' : '48h Cash Offer'}</h3>
-              <p className="text-xs text-slate-300">{isRTL ? 'دراسة القيمة السوقية وتقديم عرض شراء كاش ملزم' : 'Instant AI valuation + binding cash offer'}</p>
+              <h3 className="font-bold text-sm text-white">{isRTL ? 'دراسة وعرض كاش 48h' : '48h Cash Offer'}</h3>
+              <p className="text-xs text-slate-300">{isRTL ? 'دراسة السوق ومراجعة الوحدة لتقديم عرض شراء كاش ملزم' : 'Market analysis + binding cash offer'}</p>
             </div>
 
             <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center space-y-2">
@@ -132,7 +132,7 @@ export default function FastSellPage() {
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
               {isRTL 
-                ? 'فريق الاستثمار والتقييم في عقار إن يراجع بيانات وحدتك حالياً. سنتواصل معك هاتفياً وعلى واتساب بعرض الشراء الكاش خلال 24 إلى 48 ساعة.'
+                ? 'فريق الاستثمار في عقار إن يراجع بيانات وحدتك حالياً. سنتواصل معك هاتفياً وعلى واتساب بعرض الشراء الكاش خلال 24 إلى 48 ساعة.'
                 : 'AQAR IN investment team is analyzing your property specs. You will receive your binding cash offer via WhatsApp and phone within 24-48 hours.'}
             </p>
             <div className="pt-4 flex items-center justify-center gap-4">
@@ -151,7 +151,7 @@ export default function FastSellPage() {
                 {isRTL ? 'استمارة طلب عرض شراء كاش فوري' : 'Request Instant Cash Purchase Offer'}
               </h2>
               <p className="text-xs text-slate-500 mt-1">
-                {isRTL ? 'املأ التفاصيل التالية بدقة لحساب أعلى عرض مالي ممكن لوحدتك' : 'Fill in unit details accurately for maximum cash valuation'}
+                {isRTL ? 'املأ التفاصيل التالية بدقة لحساب أعلى عرض مالي ممكن لوحدتك' : 'Fill in unit details accurately for maximum cash offer'}
               </p>
             </div>
 

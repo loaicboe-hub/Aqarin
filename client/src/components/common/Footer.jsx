@@ -6,11 +6,10 @@ import {
   Phone, 
   Mail, 
   ShieldCheck, 
-  Sparkles, 
-  Calculator, 
-  Landmark, 
   ExternalLink,
-  Heart
+  Heart,
+  Zap,
+  Layers
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import BrandLogo from './BrandLogo';
@@ -33,8 +32,8 @@ export default function Footer() {
             
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-sm">
               {isRTL 
-                ? 'عقار إن (AQAR IN) — المنصة الرائدة للاستخبارات والتقييم العقاري في مصر. تقييم ذكي فوري، كشف دقيق عن الأسعار، وحلول تمويل عقاري شاملة للمشترين والمستثمرين.'
-                : 'AQAR IN — Egypt\'s premier smart property intelligence & AI valuation platform. Discover real market values and verified properties across Egypt.'}
+                ? 'عقار إن (AQAR IN) — المنصة الرائدة للخدمات والاستخبارات العقارية في مصر. عقارات موثقة، بيع سريع، تبادل عقارات، وإدارة أملاك متكاملة للمشترين والمستثمرين.'
+                : 'AQAR IN — Egypt\'s premier smart property intelligence platform. Verified properties, fast sell, property exchange, and comprehensive asset management across Egypt.'}
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -48,12 +47,12 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D] mb-4">
-              {isRTL ? 'خدمات التقييم والبحث' : 'Valuation & Search'}
+              {isRTL ? 'خدمات العقارات' : 'Property Services'}
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm">
               <li>
-                <Link to="/valuation/instant" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'التقييم الفوري الذكي' : 'Instant AI Valuation'}
+                <Link to="/fast-sell" className="hover:text-sky-600 transition-colors font-medium">
+                  {isRTL ? 'البيع السريع (كاش)' : 'Fast Sell Cash Offer'}
                 </Link>
               </li>
               <li>
@@ -79,35 +78,35 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Financing & Tools */}
+          {/* Specialized Services & Tools */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D] mb-4">
-              {isRTL ? 'التمويل والأدوات الذكية' : 'Mortgage & Tools'}
+              {isRTL ? 'حلول وخدمات متخصصة' : 'Specialized Services'}
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm">
               <li>
-                <Link to="/mortgage/calculator" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'حاسبة التمويل العقاري' : 'Mortgage Calculator'}
+                <Link to="/exchange" className="hover:text-sky-600 transition-colors font-medium">
+                  {isRTL ? 'خدمة تبادل العقارات' : 'Property Exchange'}
                 </Link>
               </li>
               <li>
-                <Link to="/mortgage/banks" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'مقارنة البنوك المصرية' : 'Egyptian Banks Rates'}
+                <Link to="/management" className="hover:text-sky-600 transition-colors font-medium">
+                  {isRTL ? 'إدارة وتشغيل الأملاك' : 'Property Management'}
+                </Link>
+              </li>
+              <li>
+                <Link to="/finishing" className="hover:text-sky-600 transition-colors font-medium">
+                  {isRTL ? 'باقات التشطيب والديكور' : 'Finishing & Renovation'}
                 </Link>
               </li>
               <li>
                 <Link to="/help-me-choose" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'اختبار مساعدة الاختيار' : 'Help Me Choose Quiz'}
+                  {isRTL ? 'اختبار مساعدة الاختيار' : 'Help Me Choose AI'}
                 </Link>
               </li>
               <li>
                 <Link to="/selling-checklist" className="hover:text-sky-600 transition-colors font-medium">
                   {isRTL ? 'قائمة فحص البائعين' : 'Seller Due Diligence'}
-                </Link>
-              </li>
-              <li>
-                <Link to="/valuation/professional" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'طلب معاينة مهندس معتمد' : 'Certified Appraiser Visit'}
                 </Link>
               </li>
             </ul>

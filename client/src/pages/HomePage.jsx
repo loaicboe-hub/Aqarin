@@ -40,7 +40,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   // Search State
-  const [activeTab, setActiveTab] = useState('buy'); // 'buy' | 'rent' | 'valuation'
+  const [activeTab, setActiveTab] = useState('buy'); // 'buy' | 'rent'
   const [searchMode, setSearchMode] = useState('classic'); // 'classic' | 'ai'
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -72,11 +72,7 @@ export default function HomePage() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (activeTab === 'valuation') {
-      navigate(`/valuation/instant?district=${encodeURIComponent(searchQuery || '5th Settlement')}`);
-    } else {
-      navigate(`/search?purpose=${activeTab === 'rent' ? 'rent' : 'sale'}&search=${encodeURIComponent(searchQuery || '5th Settlement')}`);
-    }
+    navigate(`/search?purpose=${activeTab === 'rent' ? 'rent' : 'sale'}&search=${encodeURIComponent(searchQuery || '5th Settlement')}`);
   };
 
   const handleSelectHotspot = (item) => {
@@ -96,22 +92,22 @@ export default function HomePage() {
 
   const faqs = [
     {
-      qEn: 'How does AQAR IN calculate property valuation?',
-      qAr: 'كيف تحسب منصة عقار إن (AQAR IN) القيمة السوقية للعقار؟',
-      aEn: 'Our proprietary valuation algorithm analyzes live transaction benchmarks across 150+ Egyptian compounds, integrating variables such as location, developer tier, floor level, view (Garden/Lagoon/Golf), and finishing quality (Core & Shell to Ultra-Lux).',
-      aAr: 'تعتمد خوارزمية التقييم على تحليل آلاف الصفقات ومؤشرات الأسعار الحية في أكثر من 150 كمبوند مصري، مع الأخذ بالاعتبار المنطقة، الدور، نوع الإطلالة ومستوى التشطيب.'
+      qEn: 'How does AQAR IN Fast Sell work?',
+      qAr: 'كيف تعمل خدمة البيع السريع (Fast Sell) على عقار إن؟',
+      aEn: 'Fast Sell allows property owners to receive a direct cash purchase offer within 72 hours, eliminating the lengthy wait times of traditional brokerage.',
+      aAr: 'تتيح خدمة البيع السريع لأصحاب العقارات الحصول على عرض شراء نقدي فوري خلال 72 ساعة وتخليص الإجراءات بسرعة وأمان بدون وسطاء.'
     },
     {
-      qEn: 'Is the instant valuation acceptable for Egyptian bank mortgages?',
-      qAr: 'هل التقييم الفوري معتمد لدى البنوك المصرية للتمويل العقاري؟',
-      aEn: 'The instant AI valuation provides an accurate market benchmark. For official bank financing approvals, you can book an on-site Certified Engineering Due Diligence report directly from our platform.',
-      aAr: 'التقييم الفوري يقدم سعراً استرشادياً فائق الدقة، كما يمكنك من خلال المنصة طلب معاينة مهندس وخبير معتمد لإصدار تقرير رسمي مقبول لدى جميع البنوك.'
+      qEn: 'How does Property Exchange work?',
+      qAr: 'كيف تعمل خدمة تبادل العقارات (Property Exchange)؟',
+      aEn: 'Our Property Exchange service matches verified property owners looking to swap homes, apartments, or villas with cash-differential settlement handled securely.',
+      aAr: 'تتيح منصة عقار إن التوفيق بين ملاك العقارات الراغبين في استبدال عقار بآخر، مع تسوية فروق الأسعار النقدية بكل شفافية وضمانات قانونية.'
     },
     {
-      qEn: 'What are the current mortgage interest rates in Egypt?',
-      qAr: 'ما هي أسعار فائدة التمويل العقاري الحالية في مصر؟',
-      aEn: 'Mortgage rates range from Central Bank of Egypt (CBE) subsidized initiatives (8% & 3%) to commercial bank rates (17.5% - 19.5%) with repayment tenures up to 20 years.',
-      aAr: 'تتراوح الفائدة بين مبادرات البنك المركزي المدعومة (8% و 3%) والتمويل البنكي التجاري (17.5% - 19.5%) بفترات سداد تصل إلى 20 سنة.'
+      qEn: 'How are properties verified on AQAR IN?',
+      qAr: 'كيف يتم التحقق وتوثيق العقارات على منصة عقار إن؟',
+      aEn: 'Every listing undergoes strict verification of title deed records, developer registration, and geospatial location validation using PostGIS mapping.',
+      aAr: 'يخضع كل عقار معروض على المنصة لتدقيق دقيق لملكية العقار وترخيص المطور مع التوثيق الجغرافي الدقيق لموقع العقار على الخريطة.'
     }
   ];
 
@@ -143,8 +139,8 @@ export default function HomePage() {
 
             <p className="text-sm sm:text-base text-slate-200 font-medium max-w-xl mx-auto">
               {isRTL 
-                ? 'البحث عن العقارات، التقييم، وحلول التمويل العقاري — كل شيء في مكان واحد.'
-                : 'Property search, valuation, and mortgage solutions — all in one place.'}
+                ? 'البحث عن العقارات، البيع السريع، التبادل وإدارة الأملاك — كل شيء في مكان واحد.'
+                : 'Property search, fast sell, property exchange, and management — all in one place.'}
             </p>
           </div>
 
@@ -159,7 +155,7 @@ export default function HomePage() {
               {/* Tabs Row */}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 
-                {/* Left Tabs: Buy / Rent / Instant valuation */}
+                {/* Left Tabs: Buy / Rent */}
                 <div className="flex items-center gap-6 text-xs sm:text-sm font-bold text-slate-600">
                   <button
                     type="button"
@@ -183,19 +179,6 @@ export default function HomePage() {
                   >
                     <span>{isRTL ? 'إيجار' : 'Rent'}</span>
                     {activeTab === 'rent' && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('valuation')}
-                    className={`relative pb-1.5 transition-colors ${
-                      activeTab === 'valuation' ? 'text-[#0B1C3D] font-extrabold' : 'hover:text-[#0B1C3D]'
-                    }`}
-                  >
-                    <span>{isRTL ? 'التقييم الفوري' : 'Instant valuation'}</span>
-                    {activeTab === 'valuation' && (
                       <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
                     )}
                   </button>
@@ -273,23 +256,24 @@ export default function HomePage() {
 
             </div>
 
-            {/* Bottom Navy Section (Exact Match to Image) */}
+            {/* Bottom Navy Section (Fast Sell Action Banner) */}
             <div className="bg-[#0B1C3D] p-5 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  {isRTL ? 'اعرف القيمة الحقيقية لعقارك' : "Know Your Property's True Value"}
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  {isRTL ? 'تريد بيع عقارك بأسرع وقت؟' : 'Need to Sell Your Property Fast?'}
                 </h3>
                 <p className="text-xs text-slate-300">
-                  {isRTL ? 'اكتشف سعر عقارك في دقائق معدودة بالذكاء الاصطناعي.' : 'Discover your latest property value in just a few minutes.'}
+                  {isRTL ? 'احصل على عرض شراء كاش مباشر خلال 72 ساعة بدون عمولات.' : 'Get a direct cash purchase offer within 72 hours with zero brokerage fees.'}
                 </p>
               </div>
 
-              {/* White Pill Button: Get an Instant valuation */}
+              {/* White Pill Button: Fast Sell */}
               <Link
-                to="/valuation/instant"
+                to="/fast-sell"
                 className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-[#0B1C3D] text-xs sm:text-sm font-extrabold shadow-sm shrink-0 transition-transform hover:scale-105"
               >
-                {isRTL ? 'ابدأ التقييم الفوري' : 'Get an Instant valuation'}
+                {isRTL ? 'بيع عقارك كاش' : 'Sell Fast for Cash'}
               </Link>
             </div>
 
@@ -310,37 +294,37 @@ export default function HomePage() {
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
             {isRTL 
-              ? 'اكتشف أدوات وخدمات قوية صُممت لمساعدتك في الشراء، الإيجار، التقييم، التمويل العقاري وإدارة عقارك بكل ثقة.'
-              : 'Discover powerful tools and services designed to help you buy, rent, value, mortgage, and manage property with confidence.'}
+              ? 'اكتشف أدوات وخدمات قوية صُممت لمساعدتك في الشراء، الإيجار، البيع السريع، تبادل العقارات وإدارة عقارك بكل ثقة.'
+              : 'Discover powerful tools and services designed to help you buy, rent, fast sell, exchange, and manage property with confidence.'}
           </p>
         </div>
 
         {/* 2x2 Feature Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
-          {/* Card 1: Instant & Professional Valuation */}
+          {/* Card 1: Fast Sell Cash Offer */}
           <Link
-            to="/valuation/instant"
+            to="/fast-sell"
             className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 group text-left"
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
                 src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80"
-                alt="Instant & Professional Valuation"
+                alt="Fast Sell Cash Offer"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             <div className="flex-1 space-y-2">
               <h3 className="text-lg sm:text-xl font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors">
-                {isRTL ? 'التقييم الفوري والمعتمد' : 'Instant & Professional Valuation'}
+                {isRTL ? 'البيع السريع الفوري (كاش)' : 'Fast Sell & Cash Offer'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 {isRTL 
-                  ? 'تقدير فوري لسعر عقارك أو طلب تقرير معاينة وفحص هندسي معتمد — في أي وقت.'
-                  : 'Instant property estimates or certified professional valuations — whenever you need them.'}
+                  ? 'احصل على عرض شراء كاش فوري ومباشر لعقارك خلال 72 ساعة فقط وبدون عمولات وسيط.'
+                  : 'Receive a guaranteed cash purchase offer for your property within 72 hours with zero brokerage hassle.'}
               </p>
               <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors pt-1">
-                <span>{isRTL ? 'ابدأ الآن' : 'Start'}</span>
+                <span>{isRTL ? 'طلب بيع سريع' : 'Get Cash Offer'}</span>
                 <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
               </div>
             </div>
@@ -403,29 +387,29 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Card 4: Mortgage Solutions */}
+          {/* Card 4: Property Exchange */}
           <Link
-            to="/mortgage/calculator"
+            to="/exchange"
             className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 group text-left"
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
                 src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80"
-                alt="Mortgage Solutions"
+                alt="Property Exchange"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             <div className="flex-1 space-y-2">
               <h3 className="text-lg sm:text-xl font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors">
-                {isRTL ? 'حلول التمويل العقاري' : 'Mortgage Solutions'}
+                {isRTL ? 'خدمة تبادل العقارات' : 'Property Exchange'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 {isRTL 
-                  ? 'قارن خيارات التمويل، قدم عبر البنوك المعتمدة، واحسب قسطك الشهري بدقة.'
-                  : 'Compare financing options, apply through trusted banks, and estimate your monthly mortgage payments.'}
+                  ? 'استبدل شقتك أو فيلتك بعقار آخر في منطقة جديدة تناسبك مع تسوية الفروق النقدية بأمان.'
+                  : 'Swap your apartment or villa for a new property matching your needs with safe monetary difference settlement.'}
               </p>
               <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors pt-1">
-                <span>{isRTL ? 'استكشف التمويل العقاري' : 'Explore Mortgage'}</span>
+                <span>{isRTL ? 'ابدأ التبادل العقاري' : 'Explore Exchange'}</span>
                 <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
               </div>
             </div>
@@ -444,7 +428,7 @@ export default function HomePage() {
             <BarChart3 className="w-4 h-4 text-emerald-600" />
             {isRTL ? 'متوسط سعر المتر المربع اليوم في مصر (2026 EGP/m²):' : 'Live Real Estate Price Index (2026 EGP/m²):'}
           </span>
-          <Link to="/valuation" className="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1">
+          <Link to="/search" className="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1">
             <span>{isRTL ? 'استكشف كافة المناطق' : 'Explore All Hotspots'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -503,20 +487,20 @@ export default function HomePage() {
               {isRTL ? 'لماذا تختار عقار إن (AQAR IN)؟' : 'Why Choose AQAR IN?'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              {isRTL ? 'المنصة الأكثر شفافية ودقة في التقييم والتمويل العقاري في مصر' : 'Empowering buyers, sellers, and investors with data-driven real estate intelligence'}
+              {isRTL ? 'المنصة الأكثر شفافية وسرعة في المعاملات والخدمات العقارية الموثقة في مصر' : 'Empowering buyers, sellers, and investors with data-driven real estate intelligence'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-sm">
               <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-                <Sparkles className="w-6 h-6" />
+                <Zap className="w-6 h-6" />
               </div>
               <h3 className="text-base font-bold text-[#0B1C3D]">
-                {isRTL ? 'تقييم ذكي فوري بدقة 95%+' : 'Instant AI Property Valuation'}
+                {isRTL ? 'بيع كاش فوري ومضمون' : 'Guaranteed Fast Cash Sell'}
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                {isRTL ? 'حساب دقيق للقيمة السوقية وسعر المتر بناءً على صفقات حقيقية في كمبوندات التجمع وزايد والساحل.' : 'Statistical pricing engine benchmarking live transaction prices across 150+ Egyptian compounds.'}
+                {isRTL ? 'شراء مباشر للعقارات وتخليص الإجراءات خلال 72 ساعة بدون انتظار أو عمولات سمسرة.' : 'Direct property purchasing and closing within 72 hours without waiting or brokerage fees.'}
               </p>
             </div>
 
@@ -524,23 +508,23 @@ export default function HomePage() {
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white text-[#0B1C3D]">
-                {isRTL ? 'معاينة وفحص هندسي معتمد' : 'Certified On-Site Due Diligence'}
+              <h3 className="text-base font-bold text-[#0B1C3D]">
+                {isRTL ? 'عقارات موثقة ومفحوصة قانونياً' : 'Verified & Legally Audited'}
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                {isRTL ? 'إمكانية حجز خبير تقييم معتمد لفحص الحالة الإنشائية والأوراق القانونية وتقديم تقرير رسمي للبنوك.' : 'Accredited structural & legal audit visits delivering bank-approved valuation certificates.'}
+                {isRTL ? 'فحص كامل لسندات الملكية والموقف الإنشائي لضمان صفقات آمنة 100% لجميع الأطراف.' : 'Full verification of title deeds and structural status to guarantee 100% safe transactions.'}
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-sm">
               <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                <Landmark className="w-6 h-6" />
+                <Layers className="w-6 h-6" />
               </div>
               <h3 className="text-base font-bold text-[#0B1C3D]">
-                {isRTL ? 'حلول التمويل العقاري للبنوك' : 'Integrated Egyptian Mortgage Hub'}
+                {isRTL ? 'تبادل وإدارة أملاك متكاملة' : 'Property Exchange & Management'}
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                {isRTL ? 'حاسبة فورية ومقارنة بين بنوك CIB والأهلي وبنك مصر مع استخراج الموافقة المسبقة في خطوات بسيطة.' : 'Direct installment calculators and rate comparisons across leading Egyptian commercial banks.'}
+                {isRTL ? 'خدمات تبادل العقارات الذكية وإدارة وتأجير وصيانة الوحدات للمستثمرين وأصحاب الأملاك.' : 'Smart property exchange and end-to-end leasing and asset management for investors.'}
               </p>
             </div>
           </div>
@@ -556,7 +540,7 @@ export default function HomePage() {
             {isRTL ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
           </h2>
           <p className="text-xs text-slate-500">
-            {isRTL ? 'إجابات على أهم الاستفسارات حول التقييم والشراء والتمويل العقاري' : 'Everything you need to know about valuations, discovery & mortgages'}
+            {isRTL ? 'إجابات على أهم الاستفسارات حول الشراء والبيع والخدمات العقارية' : 'Everything you need to know about properties, buying & real estate services'}
           </p>
         </div>
 

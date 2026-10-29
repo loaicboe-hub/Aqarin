@@ -170,78 +170,37 @@ async function runTests() {
     }
   });
 
-  // 12. Instant Valuation
-  let valCode = null;
-  await test('POST /api/valuation/instant (Calculates & inserts into PostgreSQL valuations)', async () => {
+  // 12. Verification: Removed Valuation Endpoints Return 404
+  await test('CONFIRM 404: POST /api/valuation/instant returns 404 Not Found', async () => {
     const res = await fetch(`${BASE_URL}/valuation/instant`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        city: 'Cairo',
-        district: 'New Cairo',
-        compound: 'Mivida',
-        propertyType: 'apartment',
-        areaSqm: 180,
-        bedrooms: 3,
-        finishing: 'ultra_lux'
-      })
+      body: JSON.stringify({ city: 'Cairo', district: 'New Cairo' })
     });
-    const json = await res.json();
-    if (!res.ok || !json.success || !json.data.valuationCode || !json.data.id) {
-      throw new Error(`Instant valuation failed: ${JSON.stringify(json)}`);
-    }
-    valCode = json.data.valuationCode;
-  });
-
-  // 13. Professional Valuation Request
-  await test('POST /api/valuation/professional-request (Inserts into PostgreSQL)', async () => {
-    const res = await fetch(`${BASE_URL}/valuation/professional-request`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Hassan Radwan',
-        phone: '+201011112222',
-        email: 'hassan@example.com',
-        city: 'Cairo',
-        district: 'New Cairo',
-        address: 'Villa 12, South Academy'
-      })
-    });
-    const json = await res.json();
-    if (res.status !== 201 || !json.success || !json.requestId) {
-      throw new Error(`Professional valuation request failed: ${JSON.stringify(json)}`);
+    if (res.status !== 404) {
+      throw new Error(`Expected 404 for removed valuation route, got: ${res.status}`);
     }
   });
 
-  // 14. Mortgage Calculate & Apply
-  await test('POST /api/mortgage/calculate & POST /api/mortgage/apply', async () => {
-    const calcRes = await fetch(`${BASE_URL}/mortgage/calculate`, {
+  // 13. Verification: Removed Mortgage Endpoints Return 404
+  await test('CONFIRM 404: GET /api/mortgage/banks and POST /api/mortgage/calculate return 404', async () => {
+    const res1 = await fetch(`${BASE_URL}/mortgage/banks`);
+    const res2 = await fetch(`${BASE_URL}/mortgage/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyPrice: 6000000, downPaymentPct: 20, tenureYears: 15, interestRate: 18.5 })
+      body: JSON.stringify({ propertyPrice: 5000000 })
     });
-    const calcJson = await calcRes.json();
-    if (!calcRes.ok || !calcJson.success) throw new Error('Mortgage calculate failed');
+    if (res1.status !== 404 || res2.status !== 404) {
+      throw new Error(`Expected 404 for removed mortgage routes, got: ${res1.status}, ${res2.status}`);
+    }
+  });
 
-    const applyRes = await fetch(`${BASE_URL}/mortgage/apply`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fullName: 'Omar Sherif',
-        phone: '+201033334444',
-        email: 'omar@example.com',
-        propertyPrice: 6000000,
-        downPayment: 1200000,
-        loanAmount: 4800000,
-        tenureYears: 15,
-        monthlyIncome: 120000,
-        preferredBank: 'CIB Egypt',
-        estimatedInstallment: 76000
-      })
-    });
-    const applyJson = await applyRes.json();
-    if (applyRes.status !== 201 || !applyJson.success || !applyJson.applicationId) {
-      throw new Error(`Mortgage apply failed: ${JSON.stringify(applyJson)}`);
+  // 14. Verification: Removed Admin Valuation & Mortgage Endpoints Return 404
+  await test('CONFIRM 404: GET /api/admin/valuations and GET /api/admin/mortgages return 404', async () => {
+    const res1 = await fetch(`${BASE_URL}/admin/valuations`);
+    const res2 = await fetch(`${BASE_URL}/admin/mortgages`);
+    if (res1.status !== 404 || res2.status !== 404) {
+      throw new Error(`Expected 404 for removed admin routes, got: ${res1.status}, ${res2.status}`);
     }
   });
 

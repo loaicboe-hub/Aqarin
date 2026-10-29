@@ -62,7 +62,7 @@ export default function FastBuyPage() {
           <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
             {isRTL 
               ? 'وحدات معتمدة ومفحوصة قانونياً من بائعين ومطورين جادين يبحثون عن سيولة سريعة بأسعار أقل من متوسط سعر السوق الحالي بـ 10% إلى 25%.'
-              : 'Verified title-deed properties from motivated sellers and developers seeking fast cash closure at 10% - 25% below market valuation benchmarks.'}
+              : 'Verified title-deed properties from motivated sellers and developers seeking fast cash closure at 10% - 25% below market price benchmarks.'}
           </p>
 
           {/* Value Badges */}
@@ -85,7 +85,7 @@ export default function FastBuyPage() {
             <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center">
               <Sparkles className="w-6 h-6 text-purple-400 mx-auto mb-2" />
               <h3 className="text-sm font-bold">{isRTL ? 'مؤشر Aqar Score' : 'Aqar Score Certified'}</h3>
-              <p className="text-[11px] text-slate-300 mt-1">{isRTL ? 'تقييم ذكي مثبت' : 'Data-backed value'}</p>
+              <p className="text-[11px] text-slate-300 mt-1">{isRTL ? 'مؤشر سعر موثق' : 'Data-backed value'}</p>
             </div>
           </div>
 

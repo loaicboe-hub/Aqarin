@@ -58,7 +58,7 @@ export function SignInPage() {
             <BrandLogo showTagline={false} />
           </div>
           <h1 className="text-2xl font-black text-[#0B1C3D]">{isRTL ? 'تسجيل الدخول' : 'Welcome Back'}</h1>
-          <p className="text-xs text-slate-500">{isRTL ? 'سجل دخولك لمتابعة تقييماتك وعقاراتك المحفوظة' : 'Sign in to access your valuations & saved searches'}</p>
+          <p className="text-xs text-slate-500">{isRTL ? 'سجل دخولك لمتابعة عقاراتك المحفوظة وطلباتك' : 'Sign in to access your saved properties & requests'}</p>
         </div>
 
         {error && (
@@ -169,7 +169,7 @@ export function SignUpPage() {
             <BrandLogo showTagline={false} />
           </div>
           <h1 className="text-2xl font-black text-[#0B1C3D]">{isRTL ? 'إنشاء حساب جديد' : 'Create Account'}</h1>
-          <p className="text-xs text-slate-500">{isRTL ? 'انضم إلى منصة عقار إن للتقييم والاستثمار' : 'Join AQAR IN for smart property insights & valuations'}</p>
+          <p className="text-xs text-slate-500">{isRTL ? 'انضم إلى منصة عقار إن للخدمات والاستثمار العقاري' : 'Join AQAR IN for smart property insights & services'}</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
