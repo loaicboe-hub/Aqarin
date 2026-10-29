@@ -41,7 +41,6 @@ export default function HomePage() {
 
   // Search State
   const [activeTab, setActiveTab] = useState('buy'); // 'buy' | 'rent'
-  const [searchMode, setSearchMode] = useState('classic'); // 'classic' | 'ai'
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [properties, setProperties] = useState([]);
@@ -181,29 +180,6 @@ export default function HomePage() {
                     {activeTab === 'rent' && (
                       <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
                     )}
-                  </button>
-                </div>
-
-                {/* Right Switcher Pill: Classic vs AI Search */}
-                <div className="flex items-center bg-slate-100 p-1 rounded-full border border-slate-200 text-xs font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setSearchMode('classic')}
-                    className={`px-3.5 py-1 rounded-full transition-all ${
-                      searchMode === 'classic' ? 'bg-white text-[#0B1C3D] shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    Classic
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSearchMode('ai')}
-                    className={`px-3 py-1 rounded-full flex items-center gap-1 transition-all ${
-                      searchMode === 'ai' ? 'bg-white text-[#0B1C3D] shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    <Sparkles className="w-3 h-3 text-sky-500" />
-                    <span>AI Search</span>
                   </button>
                 </div>
 
