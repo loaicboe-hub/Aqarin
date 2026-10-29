@@ -37,10 +37,13 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-slate-900 font-sans selection:bg-sky-500/20 selection:text-sky-900">
       <ScrollToTop />
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
 
       <main className="flex-1 bg-white">
         <Routes>
@@ -90,11 +93,17 @@ export default function App() {
           <Route path="/dashboard" element={<UserDashboardPage />} />
           <Route path="/complete-account" element={<UserDashboardPage />} />
 
-          {/* Admin Dashboard */}
+          {/* Admin Unified Portal Routes (Excluding Mortgages & Valuations) */}
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/properties" element={<AdminDashboardPage />} />
-          <Route path="/admin/valuations" element={<AdminDashboardPage />} />
           <Route path="/admin/users" element={<AdminDashboardPage />} />
+          <Route path="/admin/leads" element={<AdminDashboardPage />} />
+          <Route path="/admin/fast-sell" element={<AdminDashboardPage />} />
+          <Route path="/admin/exchange" element={<AdminDashboardPage />} />
+          <Route path="/admin/management" element={<AdminDashboardPage />} />
+          <Route path="/admin/partners" element={<AdminDashboardPage />} />
+          <Route path="/admin/benchmarks" element={<AdminDashboardPage />} />
+          <Route path="/admin/reports" element={<AdminDashboardPage />} />
           <Route path="/admin/settings" element={<AdminDashboardPage />} />
 
           {/* Legal */}
@@ -106,7 +115,7 @@ export default function App() {
         </Routes>
       </main>
 
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }
