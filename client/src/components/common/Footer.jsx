@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import BrandLogo from './BrandLogo';
+import { SITE_CONFIG } from '../../config/siteConfig';
 
 export default function Footer() {
   const { isRTL } = useLanguage();
@@ -35,6 +36,21 @@ export default function Footer() {
                 ? 'عقار إن (AQAR IN) — المنصة الرائدة للخدمات والاستخبارات العقارية في مصر. عقارات موثقة، بيع سريع، تبادل عقارات، وإدارة أملاك متكاملة للمشترين والمستثمرين.'
                 : 'AQAR IN — Egypt\'s premier smart property intelligence platform. Verified properties, fast sell, property exchange, and comprehensive asset management across Egypt.'}
             </p>
+
+            <div className="space-y-1.5 text-xs text-slate-500 pt-1">
+              <p className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-sky-600" />
+                <a href={`tel:${SITE_CONFIG.phone}`} className="font-mono hover:text-sky-700">{SITE_CONFIG.phoneDisplay}</a>
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-sky-600" />
+                <a href={`mailto:${SITE_CONFIG.email}`} className="font-mono hover:text-sky-700">{SITE_CONFIG.email}</a>
+              </p>
+              <p className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-sky-600" />
+                <span>{isRTL ? SITE_CONFIG.addressAr : SITE_CONFIG.addressEn}</span>
+              </p>
+            </div>
 
             <div className="flex items-center gap-3 pt-2">
               <span className="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs text-sky-700 font-bold flex items-center gap-2 shadow-sm">

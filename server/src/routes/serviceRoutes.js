@@ -201,4 +201,61 @@ router.delete('/favorites', async (req, res) => {
   }
 });
 
+// 5. Get Live Active Property Exchanges
+router.get('/exchange', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM property_exchange_requests WHERE status = 'open' ORDER BY id DESC LIMIT 50"
+    );
+    res.json({ success: true, count: rows.length, data: rows });
+  } catch (err) {
+    console.error('Fetch exchanges error:', err);
+    res.status(500).json({ error: true, message: 'Failed to fetch exchanges: ' + err.message });
+  }
+});
+
+// 6. Submit Finishing & Renovation Quote Request
+router.post('/finishing', async (req, res) => {
+  try {
+    const { name, phone, areaSqm, tier, unitType, city, notes, userId = null } = req.body;
+    if (!name || !phone || !areaSqm || !tier) {
+      return res.status(400).json({ error: true, message: 'Name, phone, area, and tier are required' });
+    }
+    const { rows } = await pool.query(
+      `INSERT INTO finishing_requests (user_id, name, phone, area_sqm, tier, unit_type, city, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+      [userId || null, name, phone, Number(areaSqm), tier, unitType || 'apartment', city || 'Cairo', notes || '']
+    );
+    res.status(201).json({ success: true, requestId: rows[0].id, message: 'Finishing quote request submitted successfully' });
+  } catch (err) {
+    console.error('Finishing error:', err);
+    res.status(500).json({ error: true, message: 'Failed to submit finishing request: ' + err.message });
+  }
+});
+
+// 7. Get All Submissions by Specific User (Dashboard tracking)
+router.get('/user-submissions/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const [fastSellRes, exchangeRes, mgmtRes, finishingRes] = await Promise.all([
+      pool.query('SELECT * FROM fast_sell_requests WHERE user_id = $1 ORDER BY id DESC', [userId]),
+      pool.query('SELECT * FROM property_exchange_requests WHERE user_id = $1 ORDER BY id DESC', [userId]),
+      pool.query('SELECT * FROM property_management_contracts WHERE user_id = $1 ORDER BY id DESC', [userId]),
+      pool.query('SELECT * FROM finishing_requests WHERE user_id = $1 ORDER BY id DESC', [userId])
+    ]);
+    res.json({
+      success: true,
+      data: {
+        fastSell: fastSellRes.rows,
+        exchange: exchangeRes.rows,
+        management: mgmtRes.rows,
+        finishing: finishingRes.rows
+      }
+    });
+  } catch (err) {
+    console.error('Fetch user submissions error:', err);
+    res.status(500).json({ error: true, message: 'Failed to fetch user submissions: ' + err.message });
+  }
+});
+
 export default router;

@@ -198,3 +198,156 @@ export function toggleFavorite(propertyId) {
   localStorage.setItem(LOCAL_SAVED_PROPERTIES_KEY, JSON.stringify(updated));
   return updated;
 }
+
+// 6. Finishing Requests
+export async function submitFinishingQuote(finishingData) {
+  const res = await fetch(`${API_BASE_URL}/services/finishing`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(finishingData)
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to submit finishing request');
+  }
+  return data;
+}
+
+// 7. Live Exchanges Feed
+export async function fetchExchanges() {
+  const res = await fetch(`${API_BASE_URL}/services/exchange`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.data || [];
+}
+
+// 8. User Submissions & User Listings
+export async function fetchUserProperties(userId) {
+  const res = await fetch(`${API_BASE_URL}/properties/user/${userId}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function fetchUserSubmissions(userId) {
+  const res = await fetch(`${API_BASE_URL}/services/user-submissions/${userId}`);
+  if (!res.ok) return { fastSell: [], exchange: [], management: [], finishing: [] };
+  const data = await res.json();
+  return data.data || { fastSell: [], exchange: [], management: [], finishing: [] };
+}
+
+// 9. Admin Dashboard Service APIs
+export async function fetchAdminLeads() {
+  const res = await fetch(`${API_BASE_URL}/admin/leads`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function fetchAdminFastSell() {
+  const res = await fetch(`${API_BASE_URL}/admin/fast-sell`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminFastSellStatus(id, status, cash_offer_amount) {
+  const res = await fetch(`${API_BASE_URL}/admin/fast-sell/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, cash_offer_amount })
+  });
+  return await res.json();
+}
+
+export async function fetchAdminExchange() {
+  const res = await fetch(`${API_BASE_URL}/admin/exchange`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminExchangeStatus(id, status) {
+  const res = await fetch(`${API_BASE_URL}/admin/exchange/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  return await res.json();
+}
+
+export async function fetchAdminManagement() {
+  const res = await fetch(`${API_BASE_URL}/admin/management`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminManagementStatus(id, status) {
+  const res = await fetch(`${API_BASE_URL}/admin/management/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  return await res.json();
+}
+
+export async function fetchAdminPartners() {
+  const res = await fetch(`${API_BASE_URL}/admin/partners`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminPartnerStatus(id, status) {
+  const res = await fetch(`${API_BASE_URL}/admin/partners/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  return await res.json();
+}
+
+export async function fetchAdminFinishing() {
+  const res = await fetch(`${API_BASE_URL}/admin/finishing`);
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function updateAdminFinishingStatus(id, status) {
+  const res = await fetch(`${API_BASE_URL}/admin/finishing/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  return await res.json();
+}
+
+export async function fetchAdminReports() {
+  const res = await fetch(`${API_BASE_URL}/admin/reports`);
+  const data = await res.json();
+  return data.data || null;
+}
+
+// 10. Password Reset APIs
+export async function requestPasswordReset(email) {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to request password reset');
+  }
+  return data;
+}
+
+export async function resetPassword(token, newPassword) {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword })
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to reset password');
+  }
+  return data;
+}
+

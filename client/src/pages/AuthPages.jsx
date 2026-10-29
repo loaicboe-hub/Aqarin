@@ -271,28 +271,196 @@ export function SignUpPage() {
 
 export function ForgotPasswordPage() {
   const { isRTL } = useLanguage();
-  const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1); // 1: request, 2: set new password, 3: completed
+  const [email, setEmail] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleRequestReset = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to process request');
+      }
+      setResetToken(data.resetToken);
+      setStep(2);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePerformReset = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setError(isRTL ? 'يجب ألا تقل كلمة المرور عن 6 أحرف' : 'Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError(isRTL ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: resetToken, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to reset password');
+      }
+      setStep(3);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-white min-h-[70vh] flex items-center justify-center px-4 py-12">
+    <div className="bg-white min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="bg-white rounded-3xl p-8 max-w-md w-full border border-slate-200 text-center space-y-6 shadow-xl">
-        <h1 className="text-2xl font-black text-[#0B1C3D]">{isRTL ? 'استعادة كلمة المرور' : 'Reset Password'}</h1>
-        {sent ? (
-          <p className="text-xs text-emerald-600 font-bold">{isRTL ? 'تم إرسال رابط الاستعادة إلى بريدك الإلكتروني.' : 'Password reset link sent to your email.'}</p>
-        ) : (
-          <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="space-y-4">
-            <input
-              type="email"
-              required
-              placeholder="name@example.com"
-              className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold"
-            />
-            <button type="submit" className="w-full py-3 rounded-full bg-[#0B1C3D] text-white font-bold text-xs">
-              {isRTL ? 'إرسال الرابط' : 'Send Reset Link'}
+        <div className="flex justify-center mb-2">
+          <BrandLogo showTagline={false} />
+        </div>
+        
+        <h1 className="text-2xl font-black text-[#0B1C3D]">
+          {isRTL ? 'استعادة كلمة المرور' : 'Password Recovery'}
+        </h1>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Step 1: Enter Email */}
+        {step === 1 && (
+          <form onSubmit={handleRequestReset} className="space-y-4 text-left">
+            <p className="text-xs text-slate-500 text-center">
+              {isRTL ? 'أدخل بريدك الإلكتروني المسجل لإنشاء رمز إعادة التعيين الفوري.' : 'Enter your registered email address to initiate password reset.'}
+            </p>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{isRTL ? 'البريد الإلكتروني' : 'Email Address'}</label>
+              <div className="relative">
+                <Mail className={`w-4 h-4 text-slate-400 absolute ${isRTL ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 pointer-events-none`} />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:border-[#0B1C3D] outline-none`}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-full bg-[#0B1C3D] hover:bg-[#122B5C] text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
+            >
+              {loading ? (isRTL ? 'جاري التحقق...' : 'Checking...') : (isRTL ? 'متابعة إعادة التعيين' : 'Continue to Reset')}
             </button>
           </form>
         )}
-        <Link to="/signin" className="block text-xs text-slate-500 hover:text-[#0B1C3D] font-bold">{isRTL ? 'العودة للدخول' : 'Back to Login'}</Link>
+
+        {/* Step 2: Set New Password */}
+        {step === 2 && (
+          <form onSubmit={handlePerformReset} className="space-y-4 text-left">
+            <p className="text-xs text-slate-500 text-center">
+              {isRTL ? `تم التحقق من الحساب (${email}). يرجى تعيين كلمة المرور الجديدة.` : `Account verified (${email}). Enter your new password below.`}
+            </p>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{isRTL ? 'كلمة المرور الجديدة' : 'New Password'}</label>
+              <div className="relative">
+                <Lock className={`w-4 h-4 text-slate-400 absolute ${isRTL ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 pointer-events-none`} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={`w-full ${isRTL ? 'pr-10 pl-11' : 'pl-10 pr-11'} py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:border-[#0B1C3D] outline-none`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(p => !p)}
+                  className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600`}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">{isRTL ? 'تأكيد كلمة المرور الجديدة' : 'Confirm New Password'}</label>
+              <div className="relative">
+                <Lock className={`w-4 h-4 text-slate-400 absolute ${isRTL ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 pointer-events-none`} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={`w-full ${isRTL ? 'pr-10 pl-11' : 'pl-10 pr-11'} py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:border-[#0B1C3D] outline-none`}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50"
+            >
+              {loading ? (isRTL ? 'جاري الحفظ...' : 'Updating...') : (isRTL ? 'حفظ كلمة المرور الجديدة' : 'Save New Password')}
+            </button>
+          </form>
+        )}
+
+        {/* Step 3: Success Confirmation */}
+        {step === 3 && (
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <p className="text-xs text-emerald-700 font-bold">
+              {isRTL ? 'تم تغيير كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.' : 'Password reset successful! You can now log in with your updated credentials.'}
+            </p>
+            <Link
+              to="/signin"
+              className="inline-block w-full py-3.5 rounded-full bg-[#0B1C3D] text-white font-bold text-xs shadow-md"
+            >
+              {isRTL ? 'تسجيل الدخول الآن' : 'Sign In Now'}
+            </Link>
+          </div>
+        )}
+
+        {step !== 3 && (
+          <Link to="/signin" className="block text-xs text-slate-500 hover:text-[#0B1C3D] font-bold">
+            {isRTL ? '← العودة لتسجيل الدخول' : '← Back to Login'}
+          </Link>
+        )}
       </div>
     </div>
   );

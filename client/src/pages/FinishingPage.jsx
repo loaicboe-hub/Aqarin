@@ -12,18 +12,36 @@ import {
   PhoneCall, 
   MessageSquareShare,
   ArrowRight,
-  Palette
+  Palette,
+  Loader2,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { submitFinishingQuote } from '../services/api';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function FinishingPage() {
   const { isRTL } = useLanguage();
+  const { user } = useAuth();
 
   // Calculator State
   const [area, setArea] = useState(150);
   const [selectedTier, setSelectedTier] = useState('super_lux');
   const [unitType, setUnitType] = useState('apartment');
-  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+  const [city, setCity] = useState('Cairo');
+  
+  // Modal / Quote Submission State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [quoteError, setQuoteError] = useState('');
+  const [formData, setFormData] = useState({
+    name: user?.fullName || '',
+    phone: user?.phone || '',
+    notes: ''
+  });
 
   const TIERS = [
     {
@@ -58,6 +76,40 @@ export default function FinishingPage() {
 
   const currentTier = TIERS.find(t => t.id === selectedTier) || TIERS[1];
   const estimatedTotal = area * currentTier.pricePerSqm;
+
+  const handleOpenQuoteModal = () => {
+    setQuoteError('');
+    setSubmitted(false);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitQuote = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      setQuoteError(isRTL ? 'يرجى إدخال الاسم ورقم الهاتف' : 'Please provide name and phone number');
+      return;
+    }
+
+    setSubmitting(true);
+    setQuoteError('');
+    try {
+      await submitFinishingQuote({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        areaSqm: area,
+        tier: currentTier.id,
+        unitType,
+        city,
+        notes: formData.notes?.trim() || '',
+        userId: user?.id || null
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setQuoteError(err.message || (isRTL ? 'فشل إرسال طلب المقايسة' : 'Failed to submit quote'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen text-slate-900 pb-20">
@@ -104,10 +156,10 @@ export default function FinishingPage() {
           </div>
 
           {/* Calculator Inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-2">
-                {isRTL ? 'مساحة الوحدة (متر مربع):' : 'Unit Area (SQM):'} <span className="text-teal-600 font-black">{area} م²</span>
+                {isRTL ? 'المساحة (م²):' : 'Area (SQM):'} <span className="text-teal-600 font-black">{area} م²</span>
               </label>
               <input
                 type="range"
@@ -143,6 +195,22 @@ export default function FinishingPage() {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-2">
+                {isRTL ? 'المدينة' : 'City'}
+              </label>
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-[#0B1C3D] outline-none"
+              >
+                <option value="Cairo">{isRTL ? 'القاهرة الجديدة / التجمع' : 'New Cairo'}</option>
+                <option value="Giza">{isRTL ? 'الشيخ زايد / 6 أكتوبر' : 'Sheikh Zayed / 6th October'}</option>
+                <option value="New Capital">{isRTL ? 'العاصمة الإدارية' : 'New Administrative Capital'}</option>
+                <option value="North Coast">{isRTL ? 'الساحل الشمالي' : 'North Coast'}</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-2">
                 {isRTL ? 'اختيار باقة التشطيب' : 'Finishing Package'}
               </label>
               <select
@@ -173,15 +241,25 @@ export default function FinishingPage() {
               </p>
             </div>
 
-            <a
-              href={`https://wa.me/201012345678?text=Hello,%20I%20want%20a%20finishing%20quote%20for%20${area}%20sqm%20with%20${currentTier.id}%20tier.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 rounded-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition-all shrink-0 flex items-center gap-2"
-            >
-              <MessageSquareShare className="w-4 h-4" />
-              <span>{isRTL ? 'طلب معاينة ومقايسة مجانية' : 'Request Free Site Inspection'}</span>
-            </a>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={handleOpenQuoteModal}
+                className="px-6 py-3.5 rounded-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+              >
+                <Calculator className="w-4 h-4" />
+                <span>{isRTL ? 'طلب مقايسة ومعاينة رسمية' : 'Request Official Quote'}</span>
+              </button>
+              <a
+                href={SITE_CONFIG.getWhatsAppUrl(`Hello, I want a finishing quote for ${area} sqm (${unitType}) with ${currentTier.nameEn} tier.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3.5 rounded-full bg-white border border-slate-200 text-emerald-600 hover:bg-emerald-50 transition-colors shadow-xs"
+                title="WhatsApp Direct"
+              >
+                <MessageSquareShare className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -238,9 +316,10 @@ export default function FinishingPage() {
 
               <div className="pt-6">
                 <button
+                  type="button"
                   onClick={() => {
                     setSelectedTier(tier.id);
-                    window.scrollTo({ top: 400, behavior: 'smooth' });
+                    window.scrollTo({ top: 350, behavior: 'smooth' });
                   }}
                   className={`w-full py-3 rounded-full text-xs font-bold transition-all ${
                     tier.popular
@@ -248,13 +327,137 @@ export default function FinishingPage() {
                       : 'bg-slate-100 hover:bg-slate-200 text-[#0B1C3D]'
                   }`}
                 >
-                  {isRTL ? 'احسب مساحتك بهذه الباقة' : 'Calculate With This Package'}
+                  {isRTL ? 'احسب تكلفة وحدتك بهذه الباقة' : 'Calculate Unit With This Tier'}
                 </button>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Quote Request Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                  <Paintbrush className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#0B1C3D]">
+                    {isRTL ? 'طلب مقايسة ومعاينة تشطيب' : 'Request Finishing Inspection'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {area} م² • {isRTL ? currentTier.nameAr : currentTier.nameEn}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {quoteError && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{quoteError}</span>
+              </div>
+            )}
+
+            {submitted ? (
+              <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4">
+                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                <h4 className="text-base font-bold text-emerald-900">
+                  {isRTL ? 'تم تسجيل طلب المقايسة بنجاح!' : 'Finishing Quote Received!'}
+                </h4>
+                <p className="text-xs text-emerald-700">
+                  {isRTL 
+                    ? 'تم حفظ طلبك في قاعدة بيانات عقار إن. سيتواصل معك مهندس الديكور المختص لتحديد موعد المعاينة على أرض الواقع.'
+                    : 'Our certified interior architect will contact you to coordinate on-site measurement and 3D design schedule.'}
+                </p>
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <a
+                    href={SITE_CONFIG.getWhatsAppUrl(`Hello, I just submitted finishing request for ${area} sqm in ${city}.`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm"
+                  >
+                    <MessageSquareShare className="w-4 h-4" />
+                    <span>{isRTL ? 'تواصل عبر واتساب فوراً' : 'Connect on WhatsApp'}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-bold"
+                  >
+                    {isRTL ? 'إغلاق' : 'Close'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitQuote} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder={isRTL ? 'أحمد محمد' : 'e.g. John Doe'}
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-teal-600 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'رقم الهاتف (واتساب)' : 'Phone Number'}</label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+2010..."
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-teal-600 outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'ملاحظات إضافية أو موعد الاستلام المستهدف' : 'Additional Notes / Handover Target'}</label>
+                  <textarea
+                    rows="3"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder={isRTL ? 'الوحدة على المحارة أو نصف تشطيب، الاستلام المطلوب خلال 4 أشهر...' : 'e.g. Core & shell unit, handover within 4 months...'}
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:border-teal-600 outline-none resize-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                  >
+                    {isRTL ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md disabled:opacity-50"
+                  >
+                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    <span>{isRTL ? 'تأكيد إرسال الطلب' : 'Submit Quote Request'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

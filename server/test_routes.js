@@ -465,6 +465,153 @@ async function runTests() {
     }
   });
 
+  // 25. Admin Leads Inquiries
+  await test('GET /api/admin/leads (Fetches joined inquiries & properties)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/leads`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !Array.isArray(json.data)) {
+      throw new Error(`Failed to fetch admin leads: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 26. Fast Sell Admin & Update
+  let fastSellId = null;
+  await test('GET /api/admin/fast-sell & PUT status (Fetches requests and updates status/cash offer)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/fast-sell`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !Array.isArray(json.data)) {
+      throw new Error(`Failed to fetch fast sell requests: ${JSON.stringify(json)}`);
+    }
+    if (json.data.length > 0) {
+      fastSellId = json.data[0].id;
+      const updateRes = await fetch(`${BASE_URL}/admin/fast-sell/${fastSellId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'offer_made', cash_offer_amount: 3200000 })
+      });
+      const updateJson = await updateRes.json();
+      if (!updateRes.ok || !updateJson.success) {
+        throw new Error(`Failed to update fast sell status: ${JSON.stringify(updateJson)}`);
+      }
+    }
+  });
+
+  // 27. Property Exchange Feed & Admin
+  await test('GET /api/services/exchange & GET /api/admin/exchange', async () => {
+    const feedRes = await fetch(`${BASE_URL}/services/exchange`);
+    const feedJson = await feedRes.json();
+    if (!feedRes.ok || !feedJson.success || !Array.isArray(feedJson.data)) {
+      throw new Error(`Failed to fetch public exchange feed: ${JSON.stringify(feedJson)}`);
+    }
+
+    const adminRes = await fetch(`${BASE_URL}/admin/exchange`);
+    const adminJson = await adminRes.json();
+    if (!adminRes.ok || !adminJson.success || !Array.isArray(adminJson.data)) {
+      throw new Error(`Failed to fetch admin exchange deals: ${JSON.stringify(adminJson)}`);
+    }
+  });
+
+  // 28. Property Management Contracts
+  await test('GET /api/admin/management (Fetches active landlord service contracts)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/management`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !Array.isArray(json.data)) {
+      throw new Error(`Failed to fetch management contracts: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 29. Partner Applications
+  await test('GET /api/admin/partners (Fetches developer & broker applications)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/partners`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !Array.isArray(json.data)) {
+      throw new Error(`Failed to fetch partner applications: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 30. Admin Analytics Reports
+  await test('GET /api/admin/reports (Fetches live metrics by purpose, category, and city)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/reports`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !json.data || !Array.isArray(json.data.byCity)) {
+      throw new Error(`Failed to fetch reports: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 31. Finishing Quotes Submission & Admin Feed
+  let finishingId = null;
+  await test('POST /api/services/finishing & GET /api/admin/finishing', async () => {
+    const postRes = await fetch(`${BASE_URL}/services/finishing`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Eng. Karim Mansour',
+        phone: '+201011223344',
+        areaSqm: 180,
+        tier: 'super_lux',
+        unitType: 'apartment',
+        city: 'Cairo',
+        notes: 'Handover target: June 2026'
+      })
+    });
+    const postJson = await postRes.json();
+    if (!postRes.ok || !postJson.success || !postJson.requestId) {
+      throw new Error(`Failed to submit finishing request: ${JSON.stringify(postJson)}`);
+    }
+    finishingId = postJson.requestId;
+
+    const getRes = await fetch(`${BASE_URL}/admin/finishing`);
+    const getJson = await getRes.json();
+    if (!getRes.ok || !getJson.success || !Array.isArray(getJson.data)) {
+      throw new Error(`Failed to fetch admin finishing requests: ${JSON.stringify(getJson)}`);
+    }
+  });
+
+  // 32. User Submissions Aggregation
+  await test('GET /api/services/user-submissions/:userId', async () => {
+    const res = await fetch(`${BASE_URL}/services/user-submissions/1`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !json.data || !Array.isArray(json.data.fastSell)) {
+      throw new Error(`Failed to fetch user submissions: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 33. User Properties
+  await test('GET /api/properties/user/:userId', async () => {
+    const res = await fetch(`${BASE_URL}/properties/user/1`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !Array.isArray(json.data)) {
+      throw new Error(`Failed to fetch user properties: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 34. Two-Step Password Reset Flow
+  let resetJwtToken = null;
+  await test('POST /api/auth/forgot-password & /api/auth/reset-password', async () => {
+    // 1. Request reset
+    const forgotRes = await fetch(`${BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@aqarin.com' })
+    });
+    const forgotJson = await forgotRes.json();
+    if (!forgotRes.ok || !forgotJson.success || !forgotJson.resetToken) {
+      throw new Error(`Failed forgot password step: ${JSON.stringify(forgotJson)}`);
+    }
+    resetJwtToken = forgotJson.resetToken;
+
+    // 2. Perform reset
+    const resetRes = await fetch(`${BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: resetJwtToken, newPassword: 'admin123' })
+    });
+    const resetJson = await resetRes.json();
+    if (!resetRes.ok || !resetJson.success) {
+      throw new Error(`Failed reset password step: ${JSON.stringify(resetJson)}`);
+    }
+  });
+
   console.log('\n======================================================');
   const passed = results.filter(r => r.status === 'PASS').length;
   const failed = results.filter(r => r.status === 'FAIL').length;

@@ -123,4 +123,82 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// 4. Request Password Reset (Step 1)
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: true, message: 'Email is required' });
+    }
+
+    const { rows } = await pool.query('SELECT id, email, full_name FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: true, message: 'No account found with this email address' });
+    }
+
+    const user = rows[0];
+    const resetToken = jwt.sign(
+      { id: user.id, email: user.email, purpose: 'pwd_reset' },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      success: true,
+      message: 'Reset instructions generated successfully.',
+      resetToken,
+      email: user.email
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: true, message: 'Failed to process password reset: ' + err.message });
+  }
+});
+
+// 5. Reset Password (Step 2)
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: true, message: 'Reset token and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: true, message: 'Password must be at least 6 characters long' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      return res.status(400).json({ error: true, message: 'Invalid or expired reset token' });
+    }
+
+    if (decoded.purpose !== 'pwd_reset') {
+      return res.status(400).json({ error: true, message: 'Invalid token purpose' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    const { rowCount } = await pool.query(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [passwordHash, decoded.id]
+    );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ error: true, message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Password has been updated successfully. You can now login with your new credentials.'
+    });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: true, message: 'Failed to reset password: ' + err.message });
+  }
+});
+
 export default router;
+

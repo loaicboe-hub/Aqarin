@@ -435,4 +435,16 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// 6. Get Properties Created By Specific User (User Dashboard)
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { rows } = await pool.query('SELECT * FROM properties WHERE user_id = $1 ORDER BY id DESC', [userId]);
+    res.json({ success: true, count: rows.length, data: rows.map(formatPropertyRow) });
+  } catch (err) {
+    console.error('Fetch user properties error:', err);
+    res.status(500).json({ error: true, message: 'Failed to retrieve user properties: ' + err.message });
+  }
+});
+
 export default router;

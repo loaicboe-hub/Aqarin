@@ -19,6 +19,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchPropertyById, toggleFavorite, getFavorites } from '../services/api';
 import PropertyMap from '../components/map/PropertyMap';
 import PropertyCard from '../components/common/PropertyCard';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function PropertyDetailsPage() {
   const { isRTL } = useLanguage();
@@ -245,7 +246,7 @@ export default function PropertyDetailsPage() {
 
               <div className="space-y-2">
                 <a
-                  href={`https://wa.me/201012345678?text=Hello,%20I%20am%20interested%20in%20property%20ID%20${property.id}:%20${encodeURIComponent(property.titleEn)}`}
+                  href={SITE_CONFIG.getWhatsAppUrl(`Hello, I am interested in property ID ${property.id}: ${property.titleEn || property.title_en || ''}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs text-center flex items-center justify-center gap-2 shadow-sm transition-all"
@@ -255,7 +256,7 @@ export default function PropertyDetailsPage() {
                 </a>
 
                 <a
-                  href="tel:+201012345678"
+                  href={`tel:${SITE_CONFIG.phone}`}
                   className="w-full py-3 rounded-full bg-slate-200 hover:bg-slate-300 text-[#0B1C3D] font-bold text-xs text-center flex items-center justify-center gap-2 transition-all"
                 >
                   <PhoneCall className="w-4 h-4" />

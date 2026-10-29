@@ -34,6 +34,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchProperties } from '../services/api';
 import PropertyCard from '../components/common/PropertyCard';
 import { EGYPT_LOCATIONS } from '../data/mockData';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function HomePage() {
   const { isRTL } = useLanguage();
@@ -554,7 +555,7 @@ export default function HomePage() {
         
         {/* WhatsApp Circular Floating Button */}
         <a
-          href="https://wa.me/201012345678?text=Hello,%20I%20have%20an%20inquiry%20about%20AQAR%20IN"
+          href={SITE_CONFIG.getWhatsAppUrl('Hello, I have an inquiry about AQAR IN')}
           target="_blank"
           rel="noopener noreferrer"
           className="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"

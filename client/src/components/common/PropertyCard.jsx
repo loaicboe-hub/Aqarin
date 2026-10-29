@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { toggleFavorite, getFavorites } from '../../services/api';
+import { SITE_CONFIG } from '../../config/siteConfig';
 
 export default function PropertyCard({ property }) {
   const { isRTL } = useLanguage();
@@ -137,7 +138,7 @@ export default function PropertyCard({ property }) {
           </Link>
 
           <a
-            href={`https://wa.me/201012345678?text=Hello,%20I%20am%20interested%20in%20property%20ID%20${property.id}:%20${encodeURIComponent(property.titleEn)}`}
+            href={SITE_CONFIG.getWhatsAppUrl(`Hello, I am interested in property ID ${property.id}: ${property.titleEn || property.title_en || ''}`)}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-200 transition-all"

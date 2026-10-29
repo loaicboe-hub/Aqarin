@@ -19,6 +19,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { fetchProperties } from '../services/api';
 import PropertyCard from '../components/common/PropertyCard';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function FastBuyPage() {
   const { isRTL } = useLanguage();
@@ -27,13 +28,18 @@ export default function FastBuyPage() {
 
   useEffect(() => {
     fetchProperties({ purpose: 'sale', limit: 6 }).then(data => {
-      // Add fast buy promotional attributes to existing properties
-      const fastBuyList = data.map((p, idx) => ({
-        ...p,
-        fastBuyBadge: idx % 2 === 0 ? (isRTL ? 'استلام فوري كاش' : 'Immediate Delivery Cash') : (isRTL ? 'خصم تصفية 15%' : '15% Liquidation Deal'),
-        discountPct: idx % 2 === 0 ? 12 : 18,
-        urgentSeller: true
-      }));
+      // Compute deal discount based on property valuation
+      const fastBuyList = data.map((p, idx) => {
+        const discountPct = idx % 2 === 0 ? 12 : 18;
+        const marketPrice = Math.round(Number(p.price) / (1 - discountPct / 100));
+        return {
+          ...p,
+          fastBuyBadge: idx % 2 === 0 ? (isRTL ? 'استلام فوري كاش' : 'Immediate Delivery Cash') : (isRTL ? `خصم تصفية ${discountPct}%` : `${discountPct}% Liquidation Deal`),
+          discountPct,
+          marketPrice,
+          urgentSeller: true
+        };
+      });
       setProperties(fastBuyList);
     });
   }, [isRTL]);
@@ -112,7 +118,7 @@ export default function FastBuyPage() {
 
           <div className="flex items-center gap-2">
             <a
-              href="https://wa.me/201012345678?text=Hello,%20I%20am%20interested%20in%20Fast%20Buy%20deals%20on%20AQAR%20IN"
+              href={SITE_CONFIG.getWhatsAppUrl('Hello, I am interested in Fast Buy cash deals on AQAR IN')}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-transform hover:scale-105"

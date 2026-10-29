@@ -30,10 +30,22 @@ import {
   Loader2,
   DollarSign,
   Image as ImageIcon,
-  UploadCloud
+  UploadCloud,
+  MessageSquareShare,
+  TrendingUp,
+  FileText,
+  BadgePercent,
+  PieChart
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchProperties, updateProperty, deleteProperty, uploadPropertyImages } from '../services/api';
+import { 
+  fetchProperties, updateProperty, deleteProperty, uploadPropertyImages,
+  fetchAdminLeads, fetchAdminFastSell, updateAdminFastSellStatus,
+  fetchAdminExchange, updateAdminExchangeStatus,
+  fetchAdminManagement, updateAdminManagementStatus,
+  fetchAdminPartners, updateAdminPartnerStatus,
+  fetchAdminReports
+} from '../services/api';
 import AdminLayout from '../components/admin/AdminLayout';
 
 export default function AdminDashboardPage() {
@@ -44,6 +56,13 @@ export default function AdminDashboardPage() {
   const [benchmarks, setBenchmarks] = useState([]);
   const [properties, setProperties] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [leadsList, setLeadsList] = useState([]);
+  const [fastSellList, setFastSellList] = useState([]);
+  const [exchangeList, setExchangeList] = useState([]);
+  const [managementList, setManagementList] = useState([]);
+  const [partnersList, setPartnersList] = useState([]);
+  const [reportsData, setReportsData] = useState(null);
+  const [offerInputs, setOfferInputs] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -90,6 +109,27 @@ export default function AdminDashboardPage() {
         setUsersList(usersRes.data || []);
       }
       setProperties(propsData || []);
+
+      // Load specific route dataset on demand
+      if (currentPath === '/admin/leads') {
+        const leads = await fetchAdminLeads().catch(() => []);
+        setLeadsList(leads);
+      } else if (currentPath === '/admin/fast-sell') {
+        const fs = await fetchAdminFastSell().catch(() => []);
+        setFastSellList(fs);
+      } else if (currentPath === '/admin/exchange') {
+        const ex = await fetchAdminExchange().catch(() => []);
+        setExchangeList(ex);
+      } else if (currentPath === '/admin/management') {
+        const mgmt = await fetchAdminManagement().catch(() => []);
+        setManagementList(mgmt);
+      } else if (currentPath === '/admin/partners') {
+        const part = await fetchAdminPartners().catch(() => []);
+        setPartnersList(part);
+      } else if (currentPath === '/admin/reports') {
+        const rep = await fetchAdminReports().catch(() => null);
+        setReportsData(rep);
+      }
     } catch (err) {
       console.error('Failed to load admin data:', err);
       setError(err.message);
@@ -333,6 +373,66 @@ export default function AdminDashboardPage() {
   };
 
   const formatEGP = (num) => new Intl.NumberFormat(isRTL ? 'ar-EG' : 'en-EG').format(num || 0);
+
+  const handleUpdateFastSellStatus = async (id, status, cashOfferAmount) => {
+    try {
+      const res = await updateAdminFastSellStatus(id, status, cashOfferAmount);
+      if (res.success) {
+        setFastSellList(prev => prev.map(item => item.id === id ? { 
+          ...item, 
+          status, 
+          cash_offer_amount: cashOfferAmount !== undefined ? cashOfferAmount : item.cash_offer_amount 
+        } : item));
+        alert(isRTL ? 'تم تحديث حالة طلب البيع السريع والعرض النقدي بنجاح!' : 'Fast sell status & offer updated successfully!');
+      } else {
+        throw new Error(res.message || 'Update failed');
+      }
+    } catch (err) {
+      alert((isRTL ? 'فشل التحديث: ' : 'Failed to update: ') + err.message);
+    }
+  };
+
+  const handleUpdateExchangeStatus = async (id, status) => {
+    try {
+      const res = await updateAdminExchangeStatus(id, status);
+      if (res.success) {
+        setExchangeList(prev => prev.map(item => item.id === id ? { ...item, status } : item));
+        alert(isRTL ? 'تم تحديث حالة طلب البدل بنجاح!' : 'Exchange status updated successfully!');
+      } else {
+        throw new Error(res.message || 'Update failed');
+      }
+    } catch (err) {
+      alert((isRTL ? 'فشل التحديث: ' : 'Failed to update: ') + err.message);
+    }
+  };
+
+  const handleUpdateManagementStatus = async (id, status) => {
+    try {
+      const res = await updateAdminManagementStatus(id, status);
+      if (res.success) {
+        setManagementList(prev => prev.map(item => item.id === id ? { ...item, status } : item));
+        alert(isRTL ? 'تم تحديث حالة عقد الإدارة بنجاح!' : 'Management contract updated successfully!');
+      } else {
+        throw new Error(res.message || 'Update failed');
+      }
+    } catch (err) {
+      alert((isRTL ? 'فشل التحديث: ' : 'Failed to update: ') + err.message);
+    }
+  };
+
+  const handleUpdatePartnerStatus = async (id, status) => {
+    try {
+      const res = await updateAdminPartnerStatus(id, status);
+      if (res.success) {
+        setPartnersList(prev => prev.map(item => item.id === id ? { ...item, status } : item));
+        alert(isRTL ? 'تم تحديث طلب الشريك بنجاح!' : 'Partner application updated successfully!');
+      } else {
+        throw new Error(res.message || 'Update failed');
+      }
+    } catch (err) {
+      alert((isRTL ? 'فشل التحديث: ' : 'Failed to update: ') + err.message);
+    }
+  };
 
   // -------------------------------------------------------------
   // VIEW RENDERERS
@@ -781,43 +881,652 @@ export default function AdminDashboardPage() {
     </div>
   );
 
-  // 5. Standard Operational Table Placeholder for specialized services
-  const renderStandardServiceView = (titleEn, titleAr, icon, descEn, descAr, count = 0) => {
-    const IconComp = icon;
+  // 5. Interactive Leads Section
+  const renderLeadsSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <Inbox className="w-5 h-5 text-indigo-600" />
+            <span>{isRTL ? 'طلبات واستفسارات العملاء (Leads)' : 'Customer Leads & Inquiries'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'الاستفسارات الواردة مباشرة من صفحات تفاصيل العقارات المسجلة بقاعدة البيانات.' : 'Direct inquiries submitted by buyers & tenants on property detail pages.'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black">
+            {leadsList.length} {isRTL ? 'استفسار' : 'Leads'}
+          </span>
+          <button 
+            onClick={loadData}
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+            title={isRTL ? 'تحديث' : 'Refresh'}
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-y border-slate-200">
+            <tr>
+              <th className="p-3.5">#</th>
+              <th className="p-3.5">{isRTL ? 'العقار المعني' : 'Target Property'}</th>
+              <th className="p-3.5">{isRTL ? 'بيانات العميل' : 'Client Info'}</th>
+              <th className="p-3.5">{isRTL ? 'وسيلة التواصل المفضلة' : 'Preferred Contact'}</th>
+              <th className="p-3.5">{isRTL ? 'نص الرسالة' : 'Inquiry Message'}</th>
+              <th className="p-3.5">{isRTL ? 'تاريخ الطلب' : 'Date'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'إجراء فوري' : 'Action'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {leadsList.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا توجد طلبات استفسار مسجلة حالياً.' : 'No customer inquiries recorded yet.'}
+                </td>
+              </tr>
+            ) : (
+              leadsList.map((lead) => (
+                <tr key={lead.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{lead.id}</td>
+                  <td className="p-3.5">
+                    {lead.property_id ? (
+                      <Link 
+                        to={`/property/${lead.property_id}`}
+                        target="_blank"
+                        className="group flex flex-col font-bold text-sky-700 hover:text-sky-900"
+                      >
+                        <span className="flex items-center gap-1 group-hover:underline">
+                          {isRTL ? (lead.title_ar || lead.title_en) : lead.title_en}
+                          <ExternalLink className="w-3 h-3 text-slate-400" />
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          {lead.city || ''} {lead.district ? `• ${lead.district}` : ''} {lead.price ? `• ${formatEGP(lead.price)} EGP` : ''}
+                        </span>
+                      </Link>
+                    ) : (
+                      <span className="text-slate-400 italic">{isRTL ? 'استفسار عام' : 'General Inquiry'}</span>
+                    )}
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D]">{lead.name}</p>
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                      <span className="font-mono">{lead.phone}</span>
+                      {lead.email && <span className="text-slate-400 font-mono">({lead.email})</span>}
+                    </div>
+                  </td>
+                  <td className="p-3.5">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold capitalize text-[10px]">
+                      {lead.preferred_contact || 'phone'}
+                    </span>
+                  </td>
+                  <td className="p-3.5 max-w-xs text-slate-700 truncate" title={lead.message}>
+                    {lead.message || '—'}
+                  </td>
+                  <td className="p-3.5 text-slate-400 text-[11px] font-mono">
+                    {new Date(lead.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="p-3.5 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {lead.phone && (
+                        <>
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${lead.name}، بخصوص استفسارك على منصة عقار إن...` : `Hello ${lead.name}, regarding your inquiry on AQAR IN...`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                            title="WhatsApp"
+                          >
+                            <MessageSquareShare className="w-4 h-4" />
+                          </a>
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="p-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+                            title="Call"
+                          >
+                            <Phone className="w-4 h-4" />
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 6. Interactive Fast Sell Section
+  const renderFastSellSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            <span>{isRTL ? 'طلبات البيع السريع والعروض النقدية' : 'Fast Sell & Cash Offer Requests'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'إدارة وتحديد عروض الشراء الفوري وتغيير حالة التفاوض مع العملاء.' : 'Manage liquidation applications, formulate cash offers, and update statuses.'}
+          </p>
+        </div>
+        <span className="px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black">
+          {fastSellList.length} {isRTL ? 'طلب بيع سريع' : 'Requests'}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-y border-slate-200">
+            <tr>
+              <th className="p-3.5">#</th>
+              <th className="p-3.5">{isRTL ? 'الوحدة والموقع' : 'Property & City'}</th>
+              <th className="p-3.5">{isRTL ? 'المساحة والسعر المطلوب' : 'Area & Asking Price'}</th>
+              <th className="p-3.5">{isRTL ? 'بيانات المالك' : 'Owner'}</th>
+              <th className="p-3.5">{isRTL ? 'الحالة الحالية' : 'Current Status'}</th>
+              <th className="p-3.5">{isRTL ? 'العرض النقدي المقدم' : 'Cash Offer'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'تواصل' : 'Contact'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {fastSellList.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا توجد طلبات بيع سريع مسجلة حتى الآن.' : 'No fast sell requests recorded yet.'}
+                </td>
+              </tr>
+            ) : (
+              fastSellList.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{item.id}</td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D] capitalize">{item.property_type || 'Apartment'}</p>
+                    <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-slate-400" />
+                      <span>{item.city} {item.district ? `• ${item.district}` : ''} {item.compound ? `(${item.compound})` : ''}</span>
+                    </p>
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-emerald-700">{formatEGP(item.expected_price || item.asking_price)} EGP</p>
+                    <p className="text-[11px] text-slate-400">{item.area_sqm} m²</p>
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D]">{item.owner_name || item.contact_name}</p>
+                    <p className="text-[11px] font-mono text-slate-500">{item.phone || item.contact_phone}</p>
+                  </td>
+                  <td className="p-3.5">
+                    <select
+                      value={item.status}
+                      onChange={(e) => handleUpdateFastSellStatus(item.id, e.target.value)}
+                      className="px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-sky-500"
+                    >
+                      <option value="pending">Pending (قيد الانتظار)</option>
+                      <option value="pending_review">Pending Review (قيد المراجعة)</option>
+                      <option value="evaluating">Evaluating (قيد التقييم)</option>
+                      <option value="offer_made">Offer Made (تم تقديم عرض)</option>
+                      <option value="accepted">Accepted (مقبول)</option>
+                      <option value="rejected">Rejected (مرفوض)</option>
+                    </select>
+                  </td>
+                  <td className="p-3.5">
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        placeholder={item.cash_offer_amount ? `${item.cash_offer_amount}` : 'EGP Offer'}
+                        value={offerInputs[item.id] !== undefined ? offerInputs[item.id] : (item.cash_offer_amount || '')}
+                        onChange={(e) => setOfferInputs({ ...offerInputs, [item.id]: e.target.value })}
+                        className="w-28 p-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = Number(offerInputs[item.id] || item.cash_offer_amount);
+                          if (val > 0) {
+                            handleUpdateFastSellStatus(item.id, 'offer_made', val);
+                          } else {
+                            alert(isRTL ? 'يرجى إدخال مبلغ العرض النقدي' : 'Please enter offer amount');
+                          }
+                        }}
+                        className="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] transition-colors"
+                      >
+                        {isRTL ? 'إرسال العرض' : 'Save Offer'}
+                      </button>
+                    </div>
+                  </td>
+                  <td className="p-3.5 text-center">
+                    {(item.phone || item.contact_phone) && (
+                      <a
+                        href={`https://wa.me/${(item.phone || item.contact_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name || item.contact_name}، بخصوص طلب البيع السريع لوحدتك في ${item.city}...` : `Hello ${item.owner_name || item.contact_name}, regarding your fast sell request in ${item.city}...`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageSquareShare className="w-4 h-4" />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 7. Interactive Exchange Section
+  const renderExchangeSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <ArrowLeftRight className="w-5 h-5 text-sky-600" />
+            <span>{isRTL ? 'طلبات وعروض البدل العقاري' : 'Property Exchange & Swap Deals'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'عروض المقايضة العقارية المتاحة ومتابعة التوافق بين العقار المعروض والمطلوب.' : 'Active property barter requests and matching opportunities across Egypt.'}
+          </p>
+        </div>
+        <span className="px-3.5 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-black">
+          {exchangeList.length} {isRTL ? 'طلب بدل' : 'Deals'}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-y border-slate-200">
+            <tr>
+              <th className="p-3.5">#</th>
+              <th className="p-3.5">{isRTL ? 'العقار المعروض' : 'Offering Property'}</th>
+              <th className="p-3.5">{isRTL ? 'العقار المطلوب للبدل' : 'Desired Property'}</th>
+              <th className="p-3.5">{isRTL ? 'الهاتف والتواصل' : 'Contact Phone'}</th>
+              <th className="p-3.5">{isRTL ? 'الحالة' : 'Status'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'تواصل' : 'Action'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {exchangeList.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا توجد طلبات بدل عقاري مسجلة حالياً.' : 'No exchange requests recorded yet.'}
+                </td>
+              </tr>
+            ) : (
+              exchangeList.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{item.id}</td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D]">{item.offering_specs || item.current_property_type || 'Property Offering'}</p>
+                    {item.current_city && <p className="text-[11px] text-slate-500">{item.current_city}</p>}
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-sky-700">{item.seeking_specs || item.desired_property_type || 'Seeking Property'}</p>
+                    {item.desired_city && <p className="text-[11px] text-slate-500">{item.desired_city}</p>}
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-mono text-slate-700">{item.phone || item.contact_phone || item.whatsapp}</p>
+                    {item.whatsapp && <p className="text-[10px] text-emerald-600 font-mono">WA: {item.whatsapp}</p>}
+                  </td>
+                  <td className="p-3.5">
+                    <select
+                      value={item.status}
+                      onChange={(e) => handleUpdateExchangeStatus(item.id, e.target.value)}
+                      className="px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-sky-500"
+                    >
+                      <option value="open">Open (مفتوح للبدل)</option>
+                      <option value="pending">Pending (قيد المراجعة)</option>
+                      <option value="review">Review (قيد الفحص)</option>
+                      <option value="matched">Matched (تم التوافق)</option>
+                      <option value="completed">Completed (مكتمل)</option>
+                      <option value="cancelled">Cancelled (ملغي)</option>
+                    </select>
+                  </td>
+                  <td className="p-3.5 text-center">
+                    {(item.phone || item.whatsapp) && (
+                      <a
+                        href={`https://wa.me/${(item.whatsapp || item.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً، بخصوص طلب البدل العقاري #${item.id} على منصة عقار إن...` : `Hello, regarding property swap #${item.id} on AQAR IN...`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageSquareShare className="w-4 h-4" />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 8. Interactive Management Section
+  const renderManagementSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-indigo-600" />
+            <span>{isRTL ? 'عقود وخطط إدارة الأملاك' : 'Property Management Contracts'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'متابعة طلبات تفويض الإدارة والتحصيل والصيانة للملاك والمستثمرين.' : 'Manage full-lifecycle rental management, rent collection, and maintenance agreements.'}
+          </p>
+        </div>
+        <span className="px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-black">
+          {managementList.length} {isRTL ? 'عقد مسجل' : 'Contracts'}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-y border-slate-200">
+            <tr>
+              <th className="p-3.5">#</th>
+              <th className="p-3.5">{isRTL ? 'الباقة المختارة' : 'Plan'}</th>
+              <th className="p-3.5">{isRTL ? 'المدينة والموقع' : 'Location'}</th>
+              <th className="p-3.5">{isRTL ? 'بيانات المالك' : 'Owner'}</th>
+              <th className="p-3.5">{isRTL ? 'الحالة' : 'Status'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'تواصل' : 'Contact'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {managementList.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا توجد عقود إدارة مسجلة حالياً.' : 'No management contracts recorded yet.'}
+                </td>
+              </tr>
+            ) : (
+              managementList.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{item.id}</td>
+                  <td className="p-3.5">
+                    <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold uppercase text-[10px] border border-indigo-200">
+                      {item.plan_type || item.plan_name || 'Standard'}
+                    </span>
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D]">{item.city} {item.compound ? `• ${item.compound}` : ''}</p>
+                    {item.property_type && <p className="text-[11px] text-slate-500 capitalize">{item.property_type}</p>}
+                  </td>
+                  <td className="p-3.5">
+                    <p className="font-bold text-[#0B1C3D]">{item.owner_name}</p>
+                    <p className="text-[11px] font-mono text-slate-500">{item.phone || item.owner_phone}</p>
+                  </td>
+                  <td className="p-3.5">
+                    <select
+                      value={item.status}
+                      onChange={(e) => handleUpdateManagementStatus(item.id, e.target.value)}
+                      className="px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-sky-500"
+                    >
+                      <option value="pending_contact">Pending Contact (في انتظار الاتصال)</option>
+                      <option value="pending">Pending (قيد الإعداد)</option>
+                      <option value="active">Active (عقد مفعل)</option>
+                      <option value="completed">Completed (مكتمل)</option>
+                      <option value="cancelled">Cancelled (ملغي)</option>
+                    </select>
+                  </td>
+                  <td className="p-3.5 text-center">
+                    {(item.phone || item.owner_phone) && (
+                      <a
+                        href={`https://wa.me/${(item.phone || item.owner_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name}، بخصوص باقة إدارة الأملاك لوحدتك في ${item.city}...` : `Hello ${item.owner_name}, regarding your property management plan...`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageSquareShare className="w-4 h-4" />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 9. Interactive Partners Section
+  const renderPartnersSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <Handshake className="w-5 h-5 text-emerald-600" />
+            <span>{isRTL ? 'طلبات انضمام الشركاء والمطورين' : 'Partner & Developer Applications'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'طلبات شراكة شركات التطوير العقاري ومكاتب الوساطة والتصميم والديكور.' : 'Applications from real estate developers, brokerage agencies, and interior designers.'}
+          </p>
+        </div>
+        <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black">
+          {partnersList.length} {isRTL ? 'طلب شريك' : 'Applications'}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-y border-slate-200">
+            <tr>
+              <th className="p-3.5">#</th>
+              <th className="p-3.5">{isRTL ? 'اسم الشركة / الكيان' : 'Company / Entity'}</th>
+              <th className="p-3.5">{isRTL ? 'نوع الشراكة' : 'Partner Type'}</th>
+              <th className="p-3.5">{isRTL ? 'المسؤول' : 'Contact Person'}</th>
+              <th className="p-3.5">{isRTL ? 'الهاتف والإيميل' : 'Phone & Email'}</th>
+              <th className="p-3.5">{isRTL ? 'الحالة' : 'Status'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'تواصل' : 'Action'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {partnersList.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا توجد طلبات شراكة مسجلة حالياً.' : 'No partner applications recorded yet.'}
+                </td>
+              </tr>
+            ) : (
+              partnersList.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{item.id}</td>
+                  <td className="p-3.5 font-bold text-[#0B1C3D]">{item.company_name}</td>
+                  <td className="p-3.5">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold capitalize text-[10px]">
+                      {item.partner_type || 'Developer'}
+                    </span>
+                  </td>
+                  <td className="p-3.5 font-medium text-slate-800">{item.contact_person}</td>
+                  <td className="p-3.5">
+                    <p className="font-mono text-slate-700">{item.phone}</p>
+                    {item.email && <p className="font-mono text-[10px] text-slate-400">{item.email}</p>}
+                  </td>
+                  <td className="p-3.5">
+                    <select
+                      value={item.status}
+                      onChange={(e) => handleUpdatePartnerStatus(item.id, e.target.value)}
+                      className="px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-sky-500"
+                    >
+                      <option value="pending">Pending (قيد الفحص)</option>
+                      <option value="approved">Approved (معتمد)</option>
+                      <option value="rejected">Rejected (مرفوض)</option>
+                    </select>
+                  </td>
+                  <td className="p-3.5 text-center">
+                    <a
+                      href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً أستاذ ${item.contact_person}، بخصوص طلب شراكة ${item.company_name} مع منصة عقار إن...` : `Hello ${item.contact_person}, regarding ${item.company_name}'s partnership application on AQAR IN...`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                      title="WhatsApp"
+                    >
+                      <MessageSquareShare className="w-4 h-4" />
+                    </a>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 10. Comprehensive Reports & Analytics Section
+  const renderReportsSection = () => {
+    const saleProps = properties.filter(p => p.purpose === 'sale');
+    const rentProps = properties.filter(p => p.purpose === 'rent');
+    const residentialProps = properties.filter(p => p.category === 'residential');
+    const commercialProps = properties.filter(p => p.category === 'commercial');
+
     return (
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
-              <IconComp className="w-5 h-5 text-sky-600" />
-              <span>{isRTL ? titleAr : titleEn}</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {isRTL ? descAr : descEn}
-            </p>
+      <div className="space-y-6">
+        {/* Top Analytics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-2">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
+              <span>{isRTL ? 'إجمالي المعروض العقاري' : 'Total Inventory'}</span>
+              <Building2 className="w-4 h-4 text-sky-600" />
+            </span>
+            <p className="text-3xl font-black text-[#0B1C3D]">{properties.length}</p>
+            <p className="text-[11px] text-emerald-600 font-bold">{saleProps.length} For Sale • {rentProps.length} For Rent</p>
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-            {count} {isRTL ? 'طلب مسجل' : 'Records'}
-          </span>
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-2">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
+              <span>{isRTL ? 'حجم الاستفسارات الواردة' : 'Total Leads Volume'}</span>
+              <Inbox className="w-4 h-4 text-indigo-600" />
+            </span>
+            <p className="text-3xl font-black text-indigo-700">{reportsData?.totalLeads ?? stats?.totalLeads ?? leadsList.length}</p>
+            <p className="text-[11px] text-slate-500 font-medium">{isRTL ? 'تفاعل مباشر من المشترين' : 'Direct buyer interest inquiries'}</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-2">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
+              <span>{isRTL ? 'طلبات البيع السريع' : 'Fast Sell Liquidation'}</span>
+              <Zap className="w-4 h-4 text-amber-500" />
+            </span>
+            <p className="text-3xl font-black text-amber-600">{reportsData?.totalFastSell ?? stats?.totalFastSellRequests ?? fastSellList.length}</p>
+            <p className="text-[11px] text-amber-700 font-medium">{isRTL ? 'عروض تصفية نقدية عاجلة' : 'Instant cash exit requests'}</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-2">
+            <span className="text-xs font-bold text-slate-500 flex items-center justify-between">
+              <span>{isRTL ? 'مؤشرات الأسعار الإقليمية' : 'Benchmarked Areas'}</span>
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+            </span>
+            <p className="text-3xl font-black text-emerald-700">{benchmarks.length}</p>
+            <p className="text-[11px] text-emerald-600 font-bold">{isRTL ? 'محافظات ومناطق مسجلة' : 'Regions actively tracked'}</p>
+          </div>
         </div>
 
-        <div className="p-12 text-center space-y-3 bg-slate-50/60 rounded-2xl border border-slate-100">
-          <IconComp className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-700">
-            {isRTL ? `قاعدة بيانات ${titleAr} متصلة وجاهزة` : `${titleEn} Table Connected in PostgreSQL`}
-          </h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            {isRTL 
-              ? 'يتم تسجيل أي طلب جديد مباشرة في جداول PostgreSQL الرسمية وبدون وسائط مؤقتة.' 
-              : 'All submissions are stored directly in PostgreSQL without temporary or mock middleware.'}
-          </p>
+        {/* Detailed Breakdown Grids */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Purpose & Category Breakdown */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <h3 className="text-sm font-black text-[#0B1C3D] flex items-center gap-2">
+              <PieChart className="w-4 h-4 text-sky-600" />
+              <span>{isRTL ? 'توزيع الوحدات حسب الغرض والنوع' : 'Property Inventory Distribution'}</span>
+            </h3>
+
+            <div className="space-y-4 pt-2">
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span>{isRTL ? 'للبيع (Sale)' : 'For Sale'}</span>
+                  <span>{properties.length > 0 ? Math.round((saleProps.length / properties.length) * 100) : 0}% ({saleProps.length})</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div 
+                    className="h-full bg-sky-600 rounded-full" 
+                    style={{ width: `${properties.length > 0 ? (saleProps.length / properties.length) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span>{isRTL ? 'للإيجار (Rent)' : 'For Rent'}</span>
+                  <span>{properties.length > 0 ? Math.round((rentProps.length / properties.length) * 100) : 0}% ({rentProps.length})</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div 
+                    className="h-full bg-indigo-500 rounded-full" 
+                    style={{ width: `${properties.length > 0 ? (rentProps.length / properties.length) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span>{isRTL ? 'سكني (Residential)' : 'Residential'}</span>
+                  <span>{properties.length > 0 ? Math.round((residentialProps.length / properties.length) * 100) : 0}% ({residentialProps.length})</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-500 rounded-full" 
+                    style={{ width: `${properties.length > 0 ? (residentialProps.length / properties.length) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span>{isRTL ? 'تجاري وإداري (Commercial)' : 'Commercial'}</span>
+                  <span>{properties.length > 0 ? Math.round((commercialProps.length / properties.length) * 100) : 0}% ({commercialProps.length})</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                  <div 
+                    className="h-full bg-purple-500 rounded-full" 
+                    style={{ width: `${properties.length > 0 ? (commercialProps.length / properties.length) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Regional Price Benchmarks Quick Table */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <h3 className="text-sm font-black text-[#0B1C3D] flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <BadgePercent className="w-4 h-4 text-emerald-600" />
+                <span>{isRTL ? 'متوسط أسعار وعوائد المناطق' : 'Regional Price & Yield Benchmarks'}</span>
+              </span>
+              <Link to="/admin/benchmarks" className="text-xs text-sky-600 font-bold hover:underline">
+                {isRTL ? 'إدارة المؤشرات' : 'Manage All'}
+              </Link>
+            </h3>
+
+            <div className="space-y-3 pt-2">
+              {benchmarks.slice(0, 5).map((b) => (
+                <div key={b.id} className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-xs text-[#0B1C3D]">{isRTL ? b.city_ar : b.city_en} • {isRTL ? b.district_ar : b.district_en}</p>
+                    <p className="text-[10px] text-slate-500 capitalize">{b.property_type}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-sky-700">{formatEGP(b.avg_price_sqm)} EGP/m²</p>
+                    <p className="text-[10px] font-bold text-emerald-600">{b.rental_yield_pct}% {isRTL ? 'عائد إيجار' : 'Yield'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
   };
 
-  // 5. Settings View
+  // 11. Settings View
   const renderSettingsView = () => (
     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
       <div className="pb-4 border-b border-slate-100">
@@ -875,13 +1584,13 @@ export default function AdminDashboardPage() {
       {currentPath === '/admin' && renderDashboardOverview()}
       {currentPath === '/admin/properties' && renderPropertiesSection()}
       {currentPath === '/admin/users' && renderUsersSection()}
-      {currentPath === '/admin/leads' && renderStandardServiceView('Leads & Inquiries', 'الطلبات والاستفسارات', Inbox, 'Direct customer inquiries and contact requests', 'طلبات واستفسارات العملاء على العقارات المعروضة', stats?.totalLeads ?? 0)}
-      {currentPath === '/admin/fast-sell' && renderStandardServiceView('Fast Sell Requests', 'طلبات البيع السريع', Zap, 'Urgent property liquidation requests with cash offers', 'طلبات البيع السريع والعروض النقدية العاجلة', stats?.totalFastSellRequests ?? 0)}
-      {currentPath === '/admin/exchange' && renderStandardServiceView('Property Exchange Requests', 'طلبات البدل العقاري', ArrowLeftRight, 'Property barter and swap deal applications', 'طلبات تبادل الوحدات العقارية والبدل بفارق نقدي', stats?.totalExchangeRequests ?? 0)}
-      {currentPath === '/admin/management' && renderStandardServiceView('Property Management Contracts', 'إدارة الأملاك', Briefcase, 'Property management inquiries and active service plans', 'عقود وخطط إدارة الوحدات والتحصيل والصيانة', stats?.totalManagementContracts ?? 0)}
-      {currentPath === '/admin/partners' && renderStandardServiceView('Partner Applications', 'طلبات الشركاء', Handshake, 'Developer, broker, and corporate partnership applications', 'طلبات انضمام المطورين والوسطاء العقاريين للمنصة', 0)}
+      {currentPath === '/admin/leads' && renderLeadsSection()}
+      {currentPath === '/admin/fast-sell' && renderFastSellSection()}
+      {currentPath === '/admin/exchange' && renderExchangeSection()}
+      {currentPath === '/admin/management' && renderManagementSection()}
+      {currentPath === '/admin/partners' && renderPartnersSection()}
       {currentPath === '/admin/benchmarks' && renderBenchmarksSection(false)}
-      {currentPath === '/admin/reports' && renderStandardServiceView('Reports & Analytics', 'التقارير والتحليلات', BarChart3, 'Comprehensive platform metrics, regional price index trends, and activity', 'تقارير أداء المنصة وتحليلات مؤشرات أسعار المحافظات المصرية', properties.length)}
+      {currentPath === '/admin/reports' && renderReportsSection()}
       {currentPath === '/admin/settings' && renderSettingsView()}
 
       {/* Edit Property Modal */}

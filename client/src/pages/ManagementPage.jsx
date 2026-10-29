@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { submitPropertyManagement } from '../services/api';
+import { SITE_CONFIG } from '../config/siteConfig';
 
 export default function ManagementPage() {
   const { isRTL } = useLanguage();
@@ -216,7 +217,7 @@ export default function ManagementPage() {
 
               <div className="pt-6 mt-6 border-t border-slate-100">
                 <a
-                  href={`https://wa.me/201012345678?text=Hello,%20I%20am%20interested%20in%20Property%20Management%20for%20my%20unit%20with%20${plan.id}%20plan.`}
+                  href={SITE_CONFIG.getWhatsAppUrl(`Hello, I am interested in Property Management for my unit with ${plan.id} plan.`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-full py-3 rounded-full text-xs font-bold text-center block transition-all ${
