@@ -38,6 +38,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [benchmarks, setBenchmarks] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -53,10 +54,11 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, benchRes, propsData] = await Promise.all([
+      const [statsRes, benchRes, propsData, usersRes] = await Promise.all([
         fetch('/api/admin/stats').then(r => r.json()).catch(() => ({ success: false })),
         fetch('/api/admin/benchmarks').then(r => r.json()).catch(() => ({ success: false })),
-        fetchProperties().catch(() => [])
+        fetchProperties().catch(() => []),
+        fetch('/api/admin/users').then(r => r.json()).catch(() => ({ success: false }))
       ]);
 
       if (statsRes.success) {
@@ -64,6 +66,9 @@ export default function AdminDashboardPage() {
       }
       if (benchRes.success) {
         setBenchmarks(benchRes.data || []);
+      }
+      if (usersRes.success) {
+        setUsersList(usersRes.data || []);
       }
       setProperties(propsData || []);
     } catch (err) {
@@ -135,7 +140,7 @@ export default function AdminDashboardPage() {
             <Users className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" />
           </div>
           <p className="text-2xl font-black text-purple-700">
-            {loading ? '...' : (stats?.totalUsers ?? 3)}
+            {loading ? '...' : (stats?.totalUsers ?? usersList.length ?? 1)}
           </p>
           <span className="text-[10px] text-purple-600 font-bold block mt-1">Verified Accounts</span>
         </Link>
@@ -436,7 +441,59 @@ export default function AdminDashboardPage() {
     </div>
   );
 
-  // 4. Standard Operational Table Placeholder for specialized services
+  // 4. Users Management View (Real PostgreSQL users table)
+  const renderUsersSection = () => (
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-black text-[#0B1C3D] flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-600" />
+            <span>{isRTL ? 'إدارة المستخدمين وحسابات النظام' : 'Users & System Accounts'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isRTL ? 'الحسابات المسجلة بقاعدة بيانات PostgreSQL 16 الرسمية' : 'Authoritative user accounts stored in PostgreSQL 16'}
+          </p>
+        </div>
+
+        <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+          {usersList.length} {isRTL ? 'حساب نشط' : 'Active Account'}
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs text-slate-600">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+            <tr>
+              <th className="p-3.5">ID</th>
+              <th className="p-3.5">{isRTL ? 'الاسم' : 'Full Name'}</th>
+              <th className="p-3.5">{isRTL ? 'البريد الإلكتروني' : 'Email'}</th>
+              <th className="p-3.5">{isRTL ? 'نوع الصلاحية' : 'Role'}</th>
+              <th className="p-3.5">{isRTL ? 'تاريخ الإنشاء' : 'Created At'}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 font-medium">
+            {usersList.map((u) => (
+              <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                <td className="p-3.5 font-mono text-slate-400">#{u.id}</td>
+                <td className="p-3.5 font-bold text-[#0B1C3D]">{u.full_name}</td>
+                <td className="p-3.5 text-slate-600 font-mono">{u.email}</td>
+                <td className="p-3.5">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                    u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {u.role}
+                  </span>
+                </td>
+                <td className="p-3.5 text-slate-400">{new Date(u.created_at).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // 5. Standard Operational Table Placeholder for specialized services
   const renderStandardServiceView = (titleEn, titleAr, icon, descEn, descAr, count = 0) => {
     const IconComp = icon;
     return (
@@ -529,7 +586,7 @@ export default function AdminDashboardPage() {
       {/* Main Content Rendered based on menu item */}
       {currentPath === '/admin' && renderDashboardOverview()}
       {currentPath === '/admin/properties' && renderPropertiesSection()}
-      {currentPath === '/admin/users' && renderStandardServiceView('Users Management', 'إدارة المستخدمين', Users, 'Registered platform accounts and administrative roles', 'حسابات المستخدمين وأدوار الصلاحيات المسجلة', stats?.totalUsers ?? 3)}
+      {currentPath === '/admin/users' && renderUsersSection()}
       {currentPath === '/admin/leads' && renderStandardServiceView('Leads & Inquiries', 'الطلبات والاستفسارات', Inbox, 'Direct customer inquiries and contact requests', 'طلبات واستفسارات العملاء على العقارات المعروضة', stats?.totalLeads ?? 0)}
       {currentPath === '/admin/fast-sell' && renderStandardServiceView('Fast Sell Requests', 'طلبات البيع السريع', Zap, 'Urgent property liquidation requests with cash offers', 'طلبات البيع السريع والعروض النقدية العاجلة', stats?.totalFastSellRequests ?? 0)}
       {currentPath === '/admin/exchange' && renderStandardServiceView('Property Exchange Requests', 'طلبات البدل العقاري', ArrowLeftRight, 'Property barter and swap deal applications', 'طلبات تبادل الوحدات العقارية والبدل بفارق نقدي', stats?.totalExchangeRequests ?? 0)}

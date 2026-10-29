@@ -82,4 +82,15 @@ router.get('/leads', async (req, res) => {
   }
 });
 
+// 5. Get All Users (Admin view)
+router.get('/users', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id, email, full_name, role, created_at FROM users ORDER BY id ASC');
+    res.json({ success: true, count: rows.length, data: rows });
+  } catch (err) {
+    console.error('Fetch admin users error:', err);
+    res.status(500).json({ error: true, message: 'Failed to retrieve users: ' + err.message });
+  }
+});
+
 export default router;

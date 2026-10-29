@@ -148,20 +148,37 @@ async function runTests() {
     }
   });
 
-  // 10. Admin Stats
-  await test('GET /api/admin/stats (Returns real live PostgreSQL counts)', async () => {
+  // Clean up temporary test user immediately
+  await test('CLEANUP: Remove temporary registration test user', async () => {
+    const { default: pool } = await import('./src/db.js');
+    await pool.query('DELETE FROM users WHERE email = $1', [testEmail]);
+  });
+
+  // 10. Admin Stats (Total users must strictly equal 1: admin only)
+  await test('GET /api/admin/stats (Returns real live PostgreSQL counts with 1 admin user)', async () => {
     const res = await fetch(`${BASE_URL}/admin/stats`);
     const json = await res.json();
     if (!res.ok || !json.success || typeof json.stats.totalProperties !== 'number') {
       throw new Error(`Admin stats failed: ${JSON.stringify(json)}`);
     }
-    // Verify properties is at least 5
+    if (json.stats.totalUsers !== 1) {
+      throw new Error(`Expected exactly 1 admin user, got ${json.stats.totalUsers}`);
+    }
     if (json.stats.totalProperties < 5) {
       throw new Error(`Expected at least 5 properties, got ${json.stats.totalProperties}`);
     }
   });
 
-  // 11. Admin Benchmarks
+  // 11. Admin Users list
+  await test('GET /api/admin/users (Returns only authorized admin account)', async () => {
+    const res = await fetch(`${BASE_URL}/admin/users`);
+    const json = await res.json();
+    if (!res.ok || !json.success || json.count !== 1 || json.data[0].email !== 'admin@aqarin.com') {
+      throw new Error(`Expected only 1 admin user, got: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 12. Admin Benchmarks
   await test('GET /api/admin/benchmarks (Returns 16 location benchmarks)', async () => {
     const res = await fetch(`${BASE_URL}/admin/benchmarks`);
     const json = await res.json();
