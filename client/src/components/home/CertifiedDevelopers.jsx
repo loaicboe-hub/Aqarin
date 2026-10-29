@@ -45,7 +45,7 @@ export default function CertifiedDevelopers() {
           {displayedDevelopers.map((dev) => (
             <Link
               key={dev.id}
-              to={`/search?search=${encodeURIComponent(dev.searchKey)}`}
+              to={`/search?developer=${encodeURIComponent(dev.nameEn)}`}
               className="bg-white rounded-2xl p-4 border border-slate-200 hover:border-sky-300 shadow-2xs hover:shadow-lg transition-all duration-300 group flex flex-col justify-between"
             >
               <div className="space-y-2.5">

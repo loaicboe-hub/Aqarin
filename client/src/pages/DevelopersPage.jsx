@@ -247,7 +247,7 @@ export default function DevelopersPage() {
               {/* Card Footer Actions */}
               <div className="pt-5 mt-4 border-t border-slate-100 flex items-center gap-2">
                 <Link
-                  to={`/search?search=${encodeURIComponent(dev.searchKey)}`}
+                  to={`/search?developer=${encodeURIComponent(dev.nameEn)}`}
                   className="flex-1 py-2.5 rounded-xl bg-[#0B1C3D] hover:bg-[#122B5C] text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all shadow-xs"
                 >
                   <span>{isRTL ? 'تصفح وحدات المطور' : 'View Units'}</span>

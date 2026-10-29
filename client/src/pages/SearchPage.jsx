@@ -24,6 +24,7 @@ export default function SearchPage() {
   const [city, setCity] = useState(searchParams.get('city') || '');
   const [district, setDistrict] = useState(searchParams.get('district') || '');
   const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [developer, setDeveloper] = useState(searchParams.get('developer') || '');
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || 'all');
@@ -44,6 +45,7 @@ export default function SearchPage() {
       propertyType: propertyType === 'all' ? undefined : propertyType,
       city: city || undefined,
       district: district || undefined,
+      developer: developer || undefined,
       search: search || undefined,
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
@@ -57,7 +59,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     loadData();
-  }, [purpose, category, propertyType, city, district, search, minPrice, maxPrice, bedrooms, finishing, sort]);
+  }, [purpose, category, propertyType, city, district, developer, search, minPrice, maxPrice, bedrooms, finishing, sort]);
 
   const resetFilters = () => {
     setPurpose('sale');
