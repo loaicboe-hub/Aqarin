@@ -149,20 +149,53 @@ export default function AddPropertyPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      const priceNum = Number(form.price) || 0;
+      const areaNum = Number(form.area_sqm) || 0;
+
+      if (!form.title_en?.trim()) {
+        alert(isRTL ? 'يرجى إدخال عنوان العقار' : 'Please enter property title');
+        setLoading(false);
+        return;
+      }
+      if (priceNum <= 0) {
+        alert(isRTL ? 'يرجى إدخال سعر صحيح أكبر من الصفر' : 'Please enter a valid price greater than zero');
+        setLoading(false);
+        return;
+      }
+      if (areaNum <= 0) {
+        alert(isRTL ? 'يرجى إدخال مساحة صحيحة أكبر من الصفر' : 'Please enter a valid area greater than zero');
+        setLoading(false);
+        return;
+      }
+
       const payload = {
-        ...form,
-        titleEn: form.title_en,
-        titleAr: form.title_ar || form.title_en,
-        descriptionEn: form.description_en,
-        descriptionAr: form.description_ar || form.description_en,
-        propertyType: form.property_type,
-        price: Number(form.price),
-        areaSqm: Number(form.area_sqm),
-        downPayment: Number(form.down_payment || 0),
-        monthlyInstallment: Number(form.monthly_installment || 0),
-        installmentYears: Number(form.installment_years || 0),
-        finishingType: form.finishing_type,
-        deliveryStatus: form.delivery_status
+        title_en: form.title_en.trim(),
+        title_ar: form.title_ar?.trim() || form.title_en.trim(),
+        description_en: form.description_en?.trim() || '',
+        description_ar: form.description_ar?.trim() || form.description_en?.trim() || '',
+        purpose: form.purpose || 'sale',
+        category: form.category || 'residential',
+        property_type: form.property_type || 'apartment',
+        price: priceNum,
+        area_sqm: areaNum,
+        bedrooms: Number(form.bedrooms) || 0,
+        bathrooms: Number(form.bathrooms) || 0,
+        floor_level: Number(form.floor_level) || 1,
+        finishing_type: form.finishing_type || 'fully_finished',
+        delivery_status: form.delivery_status || 'ready',
+        delivery_year: Number(form.delivery_year) || 2026,
+        payment_type: form.payment_type || 'cash',
+        down_payment: form.payment_type === 'installments' ? (Number(form.down_payment) || 0) : 0,
+        installment_years: form.payment_type === 'installments' ? (Number(form.installment_years) || 0) : 0,
+        monthly_installment: form.payment_type === 'installments' ? (Number(form.monthly_installment) || 0) : 0,
+        city: form.city || 'Cairo',
+        district: form.district?.trim() || '',
+        compound: form.compound?.trim() || '',
+        address: form.address?.trim() || '',
+        lat: Number(form.lat) || 30.0444,
+        lng: Number(form.lng) || 31.2357,
+        images: form.images.length > 0 ? form.images : [],
+        amenities: form.amenities || []
       };
 
       const res = await createProperty(payload);
@@ -355,6 +388,51 @@ export default function AddPropertyPage() {
                 </select>
               </div>
             </div>
+
+            {form.payment_type === 'installments' && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-amber-50/50 border border-amber-200/60">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {isRTL ? 'المقدم (جنيه)' : 'Down Payment (EGP)'}
+                  </label>
+                  <input
+                    type="number"
+                    value={form.down_payment}
+                    onChange={(e) => updateField('down_payment', e.target.value)}
+                    placeholder="1000000"
+                    className="w-full p-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {isRTL ? 'مدة التقسيط (سنوات)' : 'Installment Years'}
+                  </label>
+                  <select
+                    value={form.installment_years}
+                    onChange={(e) => updateField('installment_years', Number(e.target.value))}
+                    className="w-full p-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-semibold"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12].map(yr => (
+                      <option key={yr} value={yr}>{yr} {isRTL ? 'سنوات' : 'Years'}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {isRTL ? 'القسط الشهري (جنيه)' : 'Monthly Installment (EGP)'}
+                  </label>
+                  <input
+                    type="number"
+                    value={form.monthly_installment}
+                    onChange={(e) => updateField('monthly_installment', e.target.value)}
+                    placeholder="45000"
+                    className="w-full p-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs font-semibold"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Section 3: Location */}

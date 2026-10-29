@@ -202,42 +202,79 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Helper functions to safely parse numbers and integers for PostgreSQL
+function parseNum(val, defaultVal = 0) {
+  if (val === undefined || val === null) return defaultVal;
+  if (typeof val === 'string' && val.trim() === '') return defaultVal;
+  const parsed = Number(val);
+  return isNaN(parsed) ? defaultVal : parsed;
+}
+
+function parseIntNum(val, defaultVal = 0) {
+  if (val === undefined || val === null) return defaultVal;
+  if (typeof val === 'string' && val.trim() === '') return defaultVal;
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? defaultVal : parsed;
+}
+
 // 3. Add New Property Listing
 router.post('/', async (req, res) => {
   try {
-    const {
-      title_en,
-      title_ar,
-      description_en,
-      description_ar,
-      purpose = 'sale',
-      category = 'residential',
-      property_type,
-      price,
-      area_sqm,
-      bedrooms = 0,
-      bathrooms = 0,
-      floor_level = 1,
-      finishing_type = 'fully_finished',
-      delivery_status = 'ready',
-      delivery_year = 2026,
-      payment_type = 'cash',
-      down_payment = 0,
-      installment_years = 0,
-      monthly_installment = 0,
-      city,
-      district,
-      compound,
-      address,
-      lat = 30.0444,
-      lng = 31.2357,
-      images = [],
-      amenities = [],
-      user_id = null
-    } = req.body;
+    const b = req.body || {};
 
-    if (!title_en || !price || !area_sqm || !city || !district) {
-      return res.status(400).json({ error: true, message: 'Required fields missing (title, price, area, city, district)' });
+    const title_en = (b.title_en || b.titleEn || '').trim();
+    const title_ar = (b.title_ar || b.titleAr || title_en).trim();
+    const description_en = (b.description_en || b.descriptionEn || '').trim();
+    const description_ar = (b.description_ar || b.descriptionAr || description_en).trim();
+
+    const purpose = b.purpose === 'rent' ? 'rent' : 'sale';
+    const category = b.category === 'commercial' ? 'commercial' : 'residential';
+    const property_type = b.property_type || b.propertyType || 'apartment';
+
+    const price = parseNum(b.price ?? b.price_egp, 0);
+    const area_sqm = parseIntNum(b.area_sqm ?? b.areaSqm, 0);
+    const bedrooms = parseIntNum(b.bedrooms, 0);
+    const bathrooms = parseIntNum(b.bathrooms, 0);
+    const floor_level = parseIntNum(b.floor_level ?? b.floorLevel, 1);
+
+    const validFinishings = ['core_shell', 'semi_finished', 'fully_finished', 'ultra_lux'];
+    const finishing_type = validFinishings.includes(b.finishing_type || b.finishingType)
+      ? (b.finishing_type || b.finishingType)
+      : 'fully_finished';
+
+    const delivery_status = b.delivery_status || b.deliveryStatus || 'ready';
+    const delivery_year = parseIntNum(b.delivery_year ?? b.deliveryYear, 2026);
+    const payment_type = b.payment_type || b.paymentType || 'cash';
+    const down_payment = parseNum(b.down_payment ?? b.downPayment, 0);
+    const installment_years = parseIntNum(b.installment_years ?? b.installmentYears, 0);
+    const monthly_installment = parseNum(b.monthly_installment ?? b.monthlyInstallment, 0);
+
+    const city = (b.city || '').trim();
+    const district = (b.district || '').trim();
+    const compound = (b.compound || '').trim();
+    const address = (b.address || '').trim();
+
+    const lat = parseNum(b.lat, 30.0444);
+    const lng = parseNum(b.lng, 31.2357);
+
+    const rawImages = Array.isArray(b.images) ? b.images : [];
+    const images = rawImages.filter(img => typeof img === 'string' && img.trim().length > 0);
+    const amenities = Array.isArray(b.amenities) ? b.amenities : [];
+
+    let user_id = null;
+    if (b.user_id || b.userId) {
+      const uid = parseIntNum(b.user_id || b.userId, 0);
+      if (uid > 0) {
+        const uCheck = await pool.query('SELECT id FROM users WHERE id = $1', [uid]);
+        if (uCheck.rows.length > 0) user_id = uid;
+      }
+    }
+
+    if (!title_en || price <= 0 || area_sqm <= 0 || !city || !district) {
+      return res.status(400).json({
+        error: true,
+        message: 'Required fields missing or invalid (title_en, price > 0, area_sqm > 0, city, district)'
+      });
     }
 
     const imagesJson = JSON.stringify(images.length > 0 ? images : ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80']);
@@ -258,10 +295,10 @@ router.post('/', async (req, res) => {
         'published', $28
       ) RETURNING id`,
       [
-        title_en, title_ar || title_en, description_en || '', description_ar || '', purpose, category, property_type,
+        title_en, title_ar, description_en, description_ar, purpose, category, property_type,
         price, area_sqm, bedrooms, bathrooms, floor_level, finishing_type, delivery_status,
         delivery_year, payment_type, down_payment, installment_years, monthly_installment,
-        city, district, compound || '', address || '', lat, lng, imagesJson, amenitiesJson, user_id
+        city, district, compound, address, lat, lng, imagesJson, amenitiesJson, user_id
       ]
     );
 

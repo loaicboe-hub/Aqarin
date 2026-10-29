@@ -347,6 +347,67 @@ async function runTests() {
     }
   });
 
+  // 20. Property Creation with empty/optional numeric strings
+  let createdPropId = null;
+  await test('POST /api/properties (Creates property listing with empty strings for optional numeric fields)', async () => {
+    const res = await fetch(`${BASE_URL}/properties`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title_en: 'Test Luxury Apartment with Clean Numerics',
+        title_ar: 'شقة فاخرة تجريبية',
+        purpose: 'sale',
+        category: 'residential',
+        property_type: 'apartment',
+        price: '7500000',
+        area_sqm: '190',
+        bedrooms: '3',
+        bathrooms: '2',
+        floor_level: '4',
+        finishing_type: 'fully_finished',
+        delivery_status: 'ready',
+        delivery_year: '2026',
+        payment_type: 'installments',
+        down_payment: '', // Intentionally empty string to verify numeric syntax fix
+        installment_years: '', // Intentionally empty string
+        monthly_installment: '', // Intentionally empty string
+        city: 'Cairo',
+        district: 'New Cairo',
+        compound: 'Hyde Park',
+        lat: 30.0123,
+        lng: 31.4567,
+        images: uploadedImageUrls.length > 0 ? uploadedImageUrls : ['https://images.unsplash.com/test.jpg'],
+        amenities: ['Security', 'Elevator', 'Clubhouse']
+      })
+    });
+    const json = await res.json();
+    if (res.status !== 201 || !json.success || !json.propertyId) {
+      throw new Error(`Property creation failed: ${JSON.stringify(json)}`);
+    }
+    createdPropId = json.propertyId;
+  });
+
+  // 21. Verify created property in DB
+  await test('GET /api/properties/:id (Verifies newly created listing has numeric defaults 0 and uploaded images)', async () => {
+    const res = await fetch(`${BASE_URL}/properties/${createdPropId}`);
+    const json = await res.json();
+    if (!res.ok || !json.success || !json.data) {
+      throw new Error(`Failed to fetch created property ${createdPropId}: ${JSON.stringify(json)}`);
+    }
+    const prop = json.data;
+    if (Number(prop.down_payment) !== 0 || Number(prop.monthly_installment) !== 0 || Number(prop.price) !== 7500000) {
+      throw new Error(`Numeric fields mismatch: down_payment=${prop.down_payment}, monthly=${prop.monthly_installment}, price=${prop.price}`);
+    }
+  });
+
+  // 22. Clean up test property
+  await test('CLEANUP: Remove test property listing', async () => {
+    if (createdPropId) {
+      const { default: pool } = await import('./src/db.js');
+      await pool.query('DELETE FROM properties WHERE id = $1', [createdPropId]);
+    }
+  });
+
   console.log('\n======================================================');
   const passed = results.filter(r => r.status === 'PASS').length;
   const failed = results.filter(r => r.status === 'FAIL').length;
