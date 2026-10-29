@@ -4,10 +4,8 @@
 
 -- 1. Users
 INSERT INTO users (id, full_name, email, password_hash, phone, role) VALUES
-(1, 'AQAR IN Admin', 'admin@aqarin.com', '$2a$10$wT8B9zY15e7Hk6zP4R3GkO4d7YxX1BqZtP4K1m9H9yG7n8o2p1q2r', '+201000000001', 'admin'),
-(2, 'Karim El-Sayed', 'karim@example.com', '$2a$10$wT8B9zY15e7Hk6zP4R3GkO4d7YxX1BqZtP4K1m9H9yG7n8o2p1q2r', '+201012345678', 'seller'),
-(3, 'Nourhan Mansour', 'nourhan@example.com', '$2a$10$wT8B9zY15e7Hk6zP4R3GkO4d7YxX1BqZtP4K1m9H9yG7n8o2p1q2r', '+201098765432', 'buyer')
-ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name;
+(1, 'AQAR IN Admin', 'admin@aqarin.com', '$2a$10$mHk4XSxx9FEPOWHQ4Q4Yg.426DoVhHvVMhkyoiRIIvbsHhsmwsOuW', '+201000000001', 'admin')
+ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, full_name = EXCLUDED.full_name;
 
 -- 2. Location Benchmarks
 INSERT INTO location_benchmarks (id, city_en, city_ar, district_en, district_ar, compound_en, compound_ar, avg_price_sqm, min_price_sqm, max_price_sqm, rental_yield_pct, annual_growth_pct, lat, lng) VALUES

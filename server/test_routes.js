@@ -90,17 +90,27 @@ async function runTests() {
   // 6. User Login with real bcrypt hash
   let authToken = null;
   await test('POST /api/auth/login (Authenticates against PostgreSQL bcrypt hash)', async () => {
-    // Real seeded admin password is admin123
+    // 1. Rejects wrong password
+    const wrongRes = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@aqarin.com', password: 'wrongpassword' })
+    });
+    if (wrongRes.status !== 401) {
+      throw new Error(`Expected 401 for wrong password, got ${wrongRes.status}`);
+    }
+
+    // 2. Accepts real admin123 password
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@aqarin.com', password: 'password123' })
+      body: JSON.stringify({ email: 'admin@aqarin.com', password: 'admin123' })
     });
-    // Let's test with wrong password first
-    if (res.status !== 401) {
-      // password123 is wrong, should be 401
+    const json = await res.json();
+    if (!res.ok || !json.success || !json.token || json.user.role !== 'admin') {
+      throw new Error(`Admin login failed: ${JSON.stringify(json)}`);
     }
-    // Now test with the real hash password or register a dedicated test account
+    authToken = json.token;
   });
 
   // 7. Register new user in PostgreSQL
