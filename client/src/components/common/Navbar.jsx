@@ -112,6 +112,19 @@ export default function Navbar() {
               <span>{isRTL ? 'تبادل عقاري' : 'Exchange'}</span>
             </Link>
 
+            {/* Developers (المطورين) */}
+            <Link
+              to="/developers"
+              className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${
+                isActive('/developers')
+                  ? 'text-sky-700 bg-sky-100/80 font-black'
+                  : 'hover:text-sky-600 text-[#0B1C3D]'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-sky-600" />
+              <span>{isRTL ? 'المطورين' : 'Developers'}</span>
+            </Link>
+
             {/* 7. تشطيبات (Finishing) */}
             <Link
               to="/finishing"
@@ -276,6 +289,16 @@ export default function Navbar() {
             >
               <Briefcase className="w-4 h-4 text-indigo-600" />
               <span>{isRTL ? '8. إدارة الأملاك' : '8. Management'}</span>
+            </Link>
+
+            {/* Developers */}
+            <Link 
+              to="/developers" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="p-3 bg-sky-50 text-sky-900 rounded-xl flex items-center gap-2 border border-sky-100 font-bold"
+            >
+              <Building2 className="w-4 h-4 text-sky-600" />
+              <span>{isRTL ? '9. كبار المطورين في مصر' : '9. Master Developers'}</span>
             </Link>
 
             {/* Direct WhatsApp Call/Chat */}

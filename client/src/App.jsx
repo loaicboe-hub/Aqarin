@@ -21,6 +21,7 @@ import FastSellPage from './pages/FastSellPage';
 import ExchangePage from './pages/ExchangePage';
 import FinishingPage from './pages/FinishingPage';
 import ManagementPage from './pages/ManagementPage';
+import DevelopersPage from './pages/DevelopersPage';
 
 // ScrollToTop on route transition
 function ScrollToTop() {
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/management" element={<ManagementPage />} />
           <Route path="/property-management" element={<ManagementPage />} />
           <Route path="/commercial" element={<SearchPage />} />
+          <Route path="/developers" element={<DevelopersPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/property/:id" element={<PropertyDetailsPage />} />
           <Route path="/add-property" element={<AddPropertyPage />} />

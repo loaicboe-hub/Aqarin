@@ -1,101 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Building, ShieldCheck, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Building, ShieldCheck, ArrowRight, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { MASTER_DEVELOPERS } from '../../pages/DevelopersPage';
 
 export default function CertifiedDevelopers() {
   const { isRTL } = useLanguage();
+  const [showAll, setShowAll] = useState(false);
 
-  const developers = [
-    {
-      id: 'emaar',
-      nameAr: 'إعمار مصر',
-      nameEn: 'Emaar Misr',
-      badgeAr: 'مطور معتمد فئة أ',
-      badgeEn: 'Grade-A Developer',
-      projectsAr: 'ميفيدا • أبتاون كايرو • مراسي • سولانا',
-      projectsEn: 'Mivida • Uptown Cairo • Marassi • Soul',
-      searchKey: 'Mivida',
-      established: '1997'
-    },
-    {
-      id: 'sodic',
-      nameAr: 'سوديك العقارية',
-      nameEn: 'SODIC Developments',
-      badgeAr: 'رائد المشروعات المتكاملة',
-      badgeEn: 'Integrated Master Developer',
-      projectsAr: 'أليجريا • فيليت • كارميل • إيست تاون',
-      projectsEn: 'Allegria • Villette • Karmell • Eastown',
-      searchKey: 'Allegria',
-      established: '1996'
-    },
-    {
-      id: 'palmhills',
-      nameAr: 'بالم هيلز للتعمير',
-      nameEn: 'Palm Hills Developments',
-      badgeAr: 'أكبر محفظة أراضي كمبوندات',
-      badgeEn: 'Premier Residential Communities',
-      projectsAr: 'بالم هيلز أكتوبر • باديا • نيو كايرو • هاسيندا',
-      projectsEn: 'Palm Hills Oct • Badya • New Cairo • Hacienda',
-      searchKey: 'Palm Hills',
-      established: '2005'
-    },
-    {
-      id: 'mountainview',
-      nameAr: 'ماونتن فيو (DMG)',
-      nameEn: 'Mountain View Egypt',
-      badgeAr: 'رواد سعادة العيش واللاجون',
-      badgeEn: 'Lagoon & Innovation Pioneer',
-      projectsAr: 'آي سيتي التجمع • آي سيتي أكتوبر • رأس الحكمة',
-      projectsEn: 'iCity New Cairo • iCity October • Ras El Hekma',
-      searchKey: 'Mountain View',
-      established: '2005'
-    },
-    {
-      id: 'ora',
-      nameAr: 'أورا للتطوير (ساويرس)',
-      nameEn: 'Ora Developers (Sawiris)',
-      badgeAr: 'أبراج فندقية عالمية',
-      badgeEn: 'Luxury Towers & Destinations',
-      projectsAr: 'أبراج زيد الشيخ زايد • زيد إيست • سيلفرساندز',
-      projectsEn: 'Zed Towers Zayed • Zed East • Silversands',
-      searchKey: 'Zed',
-      established: '2016'
-    },
-    {
-      id: 'tmg',
-      nameAr: 'مجموعة طلعت مصطفى (TMG)',
-      nameEn: 'Talaat Moustafa Group',
-      badgeAr: 'أكبر مطور مدن ذكية متكاملة',
-      badgeEn: 'Smart Cities Master Builder',
-      projectsAr: 'مدينتي • الرحاب • نور سيتي • بنان',
-      projectsEn: 'Madinaty • Al Rehab • Noor City • Banan',
-      searchKey: 'Madinaty',
-      established: '1970'
-    },
-    {
-      id: 'hassanallam',
-      nameAr: 'حسن علام العقارية',
-      nameEn: 'Hassan Allam Properties',
-      badgeAr: 'تراث معماري فاخر',
-      badgeEn: 'Heritage Luxury Architecture',
-      projectsAr: 'سوان ليك التجمع • سوان ليك الجونة • هاب تاون',
-      projectsEn: 'Swan Lake New Cairo • Swan Lake Gouna • Haptown',
-      searchKey: 'Swan Lake',
-      established: '1936'
-    },
-    {
-      id: 'misritalia',
-      nameAr: 'مصر إيطاليا العقارية',
-      nameEn: 'Misr Italia Properties',
-      badgeAr: 'رواد العاصمة والساحل',
-      badgeEn: 'Capital & Coastal Trailblazer',
-      projectsAr: 'إل بوسكو العاصمة • فينشي • سولاري رأس الحكمة',
-      projectsEn: 'IL Bosco • Vinci • Solare Ras El Hekma',
-      searchKey: 'Bosco',
-      established: '1998'
-    }
-  ];
+  const displayedDevelopers = showAll ? MASTER_DEVELOPERS : MASTER_DEVELOPERS.slice(0, 8);
 
   return (
     <section className="py-12 bg-slate-50/70 border-y border-slate-200/80">
@@ -106,30 +19,30 @@ export default function CertifiedDevelopers() {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>{isRTL ? 'شراكات رسمية معتمدة' : 'Verified Master Developers'}</span>
+              <span>{isRTL ? 'كبار المطورين المعتمدين في مصر' : 'Verified Master Developers'}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-[#0B1C3D] tracking-tight">
-              {isRTL ? 'كبار المطورين العقاريين في مصر' : 'Egypt’s Top Tier Developers'}
+              {isRTL ? 'مشروعات البرايماري من المطور مباشرة' : 'Egypt’s Top Tier Primary Developers'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl">
               {isRTL 
-                ? 'استكشف وحدات وكمبوندات موثقة من أكبر شركات التطوير العقاري ذات السجل الذهبي في مصر.'
-                : 'Explore verified units and communities from Egypt’s most reputable developers with proven track records.'}
+                ? 'استكشف وحدات وكمبوندات موثقة من أكبر 16 مطور عقاري في مصر بخطط سداد تصل إلى 10 سنوات وبدون عمولة.'
+                : 'Explore verified primary communities and developer units across 16 top developers with up to 10Y installments.'}
             </p>
           </div>
 
           <Link
-            to="/buy"
+            to="/developers"
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] hover:text-sky-600 transition-colors"
           >
-            <span>{isRTL ? 'استكشف كافة مشروعات المطورين' : 'View All Developer Projects'}</span>
+            <span>{isRTL ? 'دليل كافة المطورين (16)' : 'View All Developers Directory (16)'}</span>
             <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
           </Link>
         </div>
 
         {/* Developers Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {developers.map((dev) => (
+          {displayedDevelopers.map((dev) => (
             <Link
               key={dev.id}
               to={`/search?search=${encodeURIComponent(dev.searchKey)}`}
@@ -151,23 +64,39 @@ export default function CertifiedDevelopers() {
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                   </h3>
                   <p className="text-[11px] text-slate-400 font-medium">
-                    {isRTL ? `خبرة منذ ${dev.established}` : `Est. ${dev.established}`}
+                    {isRTL ? `خبرة منذ ${dev.established}` : `Est. ${dev.established}`} • {isRTL ? `تقسيط حتى ${dev.maxYears}` : `Up to ${dev.maxYears}`}
                   </p>
                 </div>
 
                 <div className="pt-2 border-t border-slate-100">
                   <div className="text-[11px] text-slate-500 font-semibold line-clamp-1">
-                    {isRTL ? dev.projectsAr : dev.projectsEn}
+                    {(isRTL ? dev.projectsAr : dev.projectsEn).join(' • ')}
                   </div>
                 </div>
               </div>
 
               <div className="mt-3 pt-2 text-[11px] font-bold text-sky-600 flex items-center justify-between">
-                <span>{isRTL ? 'تصفح الوحدات المتاحة' : 'Browse Units'}</span>
+                <span>{isRTL ? 'تصفح المشروعات والوحدات' : 'Browse Projects'}</span>
                 <span className="text-slate-400 group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Show More / Show Less Toggle Button */}
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={() => setShowAll(!showAll)}
+            className="px-6 py-2.5 rounded-full bg-white hover:bg-slate-100 text-[#0B1C3D] text-xs font-bold border border-slate-200 shadow-xs inline-flex items-center gap-2 transition-all hover:scale-105"
+          >
+            <span>
+              {showAll
+                ? (isRTL ? 'عرض أقل' : 'Show Less')
+                : (isRTL ? `عرض باقي كبار المطورين (+${MASTER_DEVELOPERS.length - 8})` : `Show All Developers (+${MASTER_DEVELOPERS.length - 8})`)}
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAll ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
       </div>

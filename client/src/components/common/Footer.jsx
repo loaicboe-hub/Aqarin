@@ -94,6 +94,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/developers" className="hover:text-sky-600 transition-colors font-medium text-emerald-700 font-bold">
+                  {isRTL ? 'كبار المطورين في مصر (16)' : 'Master Developers (16)'}
+                </Link>
+              </li>
+              <li>
                 <Link to="/search" className="hover:text-sky-600 transition-colors font-medium">
                   {isRTL ? 'محرك البحث المتقدم' : 'Advanced Search'}
                 </Link>
