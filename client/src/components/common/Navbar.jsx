@@ -140,21 +140,8 @@ export default function Navbar() {
 
           </nav>
 
-          {/* Right Actions (WhatsApp Hotline, Language, Auth, + Add Property CTA) */}
+          {/* Right Actions (Language, Auth, + Add Property CTA) */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
-            
-            {/* WhatsApp direct hotline button */}
-            <a
-              href={SITE_CONFIG.getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden xl:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 transition-all hover:scale-105 shadow-2xs"
-              title="WhatsApp: +201004491026"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="font-mono" dir="ltr">{SITE_CONFIG.phoneDisplay}</span>
-            </a>
-
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
