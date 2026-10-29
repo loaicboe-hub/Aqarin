@@ -313,4 +313,126 @@ router.post('/', async (req, res) => {
   }
 });
 
+// 4. Update Existing Property Listing
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const b = req.body || {};
+
+    const { rows: existingRows } = await pool.query('SELECT * FROM properties WHERE id = $1', [id]);
+    if (existingRows.length === 0) {
+      return res.status(404).json({ error: true, message: 'Property not found' });
+    }
+    const curr = existingRows[0];
+
+    const title_en = b.title_en !== undefined ? String(b.title_en).trim() : (b.titleEn !== undefined ? String(b.titleEn).trim() : curr.title_en);
+    const title_ar = b.title_ar !== undefined ? String(b.title_ar).trim() : (b.titleAr !== undefined ? String(b.titleAr).trim() : (curr.title_ar || title_en));
+    const description_en = b.description_en !== undefined ? String(b.description_en).trim() : (b.descriptionEn !== undefined ? String(b.descriptionEn).trim() : (curr.description_en || ''));
+    const description_ar = b.description_ar !== undefined ? String(b.description_ar).trim() : (b.descriptionAr !== undefined ? String(b.descriptionAr).trim() : (curr.description_ar || ''));
+
+    const purpose = ['sale', 'rent'].includes(b.purpose) ? b.purpose : curr.purpose;
+    const category = ['residential', 'commercial'].includes(b.category) ? b.category : curr.category;
+    const property_type = b.property_type || b.propertyType || curr.property_type;
+
+    const price = b.price !== undefined ? parseNum(b.price, Number(curr.price)) : Number(curr.price);
+    const area_sqm = b.area_sqm !== undefined ? parseIntNum(b.area_sqm, curr.area_sqm) : (b.areaSqm !== undefined ? parseIntNum(b.areaSqm, curr.area_sqm) : curr.area_sqm);
+    const bedrooms = b.bedrooms !== undefined ? parseIntNum(b.bedrooms, curr.bedrooms) : curr.bedrooms;
+    const bathrooms = b.bathrooms !== undefined ? parseIntNum(b.bathrooms, curr.bathrooms) : curr.bathrooms;
+    const floor_level = b.floor_level !== undefined ? parseIntNum(b.floor_level, curr.floor_level) : (b.floorLevel !== undefined ? parseIntNum(b.floorLevel, curr.floor_level) : curr.floor_level);
+
+    const validFinishings = ['core_shell', 'semi_finished', 'fully_finished', 'ultra_lux'];
+    const finishing_type = validFinishings.includes(b.finishing_type || b.finishingType)
+      ? (b.finishing_type || b.finishingType)
+      : curr.finishing_type;
+
+    const delivery_status = b.delivery_status || b.deliveryStatus || curr.delivery_status;
+    const delivery_year = b.delivery_year !== undefined ? parseIntNum(b.delivery_year, curr.delivery_year) : (b.deliveryYear !== undefined ? parseIntNum(b.deliveryYear, curr.delivery_year) : curr.delivery_year);
+    const payment_type = b.payment_type || b.paymentType || curr.payment_type;
+    const down_payment = b.down_payment !== undefined ? parseNum(b.down_payment, Number(curr.down_payment)) : (b.downPayment !== undefined ? parseNum(b.downPayment, Number(curr.down_payment)) : Number(curr.down_payment));
+    const installment_years = b.installment_years !== undefined ? parseIntNum(b.installment_years, curr.installment_years) : (b.installmentYears !== undefined ? parseIntNum(b.installmentYears, curr.installment_years) : curr.installment_years);
+    const monthly_installment = b.monthly_installment !== undefined ? parseNum(b.monthly_installment, Number(curr.monthly_installment)) : (b.monthlyInstallment !== undefined ? parseNum(b.monthlyInstallment, Number(curr.monthly_installment)) : Number(curr.monthly_installment));
+
+    const city = b.city !== undefined ? String(b.city).trim() : curr.city;
+    const district = b.district !== undefined ? String(b.district).trim() : curr.district;
+    const compound = b.compound !== undefined ? String(b.compound).trim() : (curr.compound || '');
+    const address = b.address !== undefined ? String(b.address).trim() : (curr.address || '');
+
+    const lat = b.lat !== undefined ? parseNum(b.lat, Number(curr.lat)) : Number(curr.lat);
+    const lng = b.lng !== undefined ? parseNum(b.lng, Number(curr.lng)) : Number(curr.lng);
+
+    let imagesJson;
+    if (Array.isArray(b.images)) {
+      const filtered = b.images.filter(img => typeof img === 'string' && img.trim().length > 0);
+      imagesJson = JSON.stringify(filtered.length > 0 ? filtered : ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80']);
+    } else {
+      imagesJson = JSON.stringify(curr.images_json);
+    }
+
+    let amenitiesJson;
+    if (Array.isArray(b.amenities)) {
+      amenitiesJson = JSON.stringify(b.amenities);
+    } else {
+      amenitiesJson = JSON.stringify(curr.amenities_json);
+    }
+
+    const validStatuses = ['published', 'pending_review', 'rejected', 'archived'];
+    const status = validStatuses.includes(b.status) ? b.status : curr.status;
+    const featured = b.featured !== undefined ? Boolean(b.featured) : curr.featured;
+
+    if (!title_en || price <= 0 || area_sqm <= 0 || !city || !district) {
+      return res.status(400).json({
+        error: true,
+        message: 'Required fields missing or invalid (title_en, price > 0, area_sqm > 0, city, district)'
+      });
+    }
+
+    const { rows: updatedRows } = await pool.query(
+      `UPDATE properties SET
+        title_en = $1, title_ar = $2, description_en = $3, description_ar = $4,
+        purpose = $5, category = $6, property_type = $7, price = $8, area_sqm = $9,
+        bedrooms = $10, bathrooms = $11, floor_level = $12, finishing_type = $13,
+        delivery_status = $14, delivery_year = $15, payment_type = $16, down_payment = $17,
+        installment_years = $18, monthly_installment = $19, city = $20, district = $21,
+        compound = $22, address = $23, lat = $24, lng = $25, images_json = $26::jsonb,
+        amenities_json = $27::jsonb, status = $28, featured = $29, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $30 RETURNING *`,
+      [
+        title_en, title_ar, description_en, description_ar, purpose, category, property_type,
+        price, area_sqm, bedrooms, bathrooms, floor_level, finishing_type, delivery_status,
+        delivery_year, payment_type, down_payment, installment_years, monthly_installment,
+        city, district, compound, address, lat, lng, imagesJson, amenitiesJson, status, featured,
+        id
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'Property updated successfully',
+      data: formatPropertyRow(updatedRows[0])
+    });
+  } catch (err) {
+    console.error('Update property error:', err);
+    res.status(500).json({ error: true, message: 'Failed to update property: ' + err.message });
+  }
+});
+
+// 5. Delete Property Listing
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await pool.query('DELETE FROM properties WHERE id = $1 RETURNING id', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: true, message: 'Property not found' });
+    }
+    res.json({
+      success: true,
+      message: 'Property deleted successfully',
+      deletedId: rows[0].id
+    });
+  } catch (err) {
+    console.error('Delete property error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete property: ' + err.message });
+  }
+});
+
 export default router;

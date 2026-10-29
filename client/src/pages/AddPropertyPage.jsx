@@ -82,8 +82,9 @@ export default function AddPropertyPage() {
     // Validate mime types and sizes
     const validFiles = [];
     for (const file of filesToProcess) {
-      if (!file.type.startsWith('image/')) {
-        setUploadError(isRTL ? 'يُسمح برفع ملفات الصور فقط (JPG, PNG, WEBP, AVIF).' : 'Only image files are allowed (JPG, PNG, WEBP, AVIF).');
+      const isImg = file.type?.startsWith('image/') || /\.(jpg|jpeg|png|webp|avif|heic|heif|jfif|gif|bmp|tiff|svg)$/i.test(file.name);
+      if (!isImg) {
+        setUploadError(isRTL ? 'يُسمح برفع ملفات الصور فقط.' : 'Only image files are allowed.');
         return;
       }
       if (file.size > 15 * 1024 * 1024) {
@@ -532,7 +533,7 @@ export default function AddPropertyPage() {
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/jpeg,image/png,image/webp,image/avif,image/jpg"
+                  accept="image/*"
                   className="hidden"
                   onChange={(e) => handleFilesSelected(e.target.files)}
                 />

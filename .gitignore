@@ -38,3 +38,8 @@ Thumbs.db
 # Temporary scratch scripts
 scratch_*.mjs
 scratch/
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+

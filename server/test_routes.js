@@ -400,8 +400,45 @@ async function runTests() {
     }
   });
 
-  // 22. Clean up test property
-  await test('CLEANUP: Remove test property listing', async () => {
+  // 22. Update Property Listing
+  await test('PUT /api/properties/:id (Updates property price, title, specs, and status)', async () => {
+    const res = await fetch(`${BASE_URL}/properties/${createdPropId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title_en: 'Test Luxury Apartment Updated',
+        price: 8200000,
+        area_sqm: 210,
+        bedrooms: 4,
+        status: 'published'
+      })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success || json.data.titleEn !== 'Test Luxury Apartment Updated' || Number(json.data.price) !== 8200000) {
+      throw new Error(`Property update failed: ${JSON.stringify(json)}`);
+    }
+  });
+
+  // 23. Delete Property Listing
+  await test('DELETE /api/properties/:id (Permanently deletes property listing from PostgreSQL)', async () => {
+    const res = await fetch(`${BASE_URL}/properties/${createdPropId}`, {
+      method: 'DELETE'
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success || json.deletedId != createdPropId) {
+      throw new Error(`Property deletion failed: ${JSON.stringify(json)}`);
+    }
+
+    // Verify it is indeed 404
+    const checkRes = await fetch(`${BASE_URL}/properties/${createdPropId}`);
+    if (checkRes.status !== 404) {
+      throw new Error(`Expected 404 for deleted property, got ${checkRes.status}`);
+    }
+    createdPropId = null; // Cleaned up
+  });
+
+  // 24. Clean up test property (fallback if delete test skipped)
+  await test('CLEANUP: Ensure test property listing is removed', async () => {
     if (createdPropId) {
       const { default: pool } = await import('./src/db.js');
       await pool.query('DELETE FROM properties WHERE id = $1', [createdPropId]);

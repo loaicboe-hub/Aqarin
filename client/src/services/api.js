@@ -53,6 +53,30 @@ export async function submitPropertyListing(propertyData) {
 
 export const createProperty = submitPropertyListing;
 
+export async function updateProperty(id, propertyData) {
+  const res = await fetch(`${API_BASE_URL}/properties/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(propertyData)
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || `Failed to update property (${res.status})`);
+  }
+  return data;
+}
+
+export async function deleteProperty(id) {
+  const res = await fetch(`${API_BASE_URL}/properties/${id}`, {
+    method: 'DELETE'
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || `Failed to delete property (${res.status})`);
+  }
+  return data;
+}
+
 // Upload property images (up to 5 images)
 export async function uploadPropertyImages(files) {
   const formData = new FormData();

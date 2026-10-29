@@ -25,16 +25,16 @@ const storage = multer.diskStorage({
   }
 });
 
-// File Filter (Images only: jpg, jpeg, png, webp, avif)
+// File Filter (Images: jpg, jpeg, png, webp, avif, heic, heif, jfif, gif, bmp, tiff, svg)
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = /jpeg|jpg|png|webp|avif/;
+  const allowedExtensions = /jpeg|jpg|png|webp|avif|heic|heif|jfif|gif|bmp|tiff|svg/i;
   const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-  const mime = file.mimetype;
+  const mime = file.mimetype || '';
 
-  if (allowedExtensions.test(ext) && (mime.startsWith('image/') || allowedExtensions.test(mime))) {
+  if (mime.startsWith('image/') || allowedExtensions.test(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only valid image files (JPEG, JPG, PNG, WEBP, AVIF) are permitted'));
+    cb(new Error('Only valid image files are permitted (JPEG, PNG, WEBP, AVIF, HEIC, JFIF, GIF, BMP)'));
   }
 };
 

@@ -13,6 +13,7 @@ import {
   Settings, 
   ShieldCheck, 
   Edit3, 
+  Trash2,
   Check, 
   X, 
   AlertCircle, 
@@ -25,10 +26,14 @@ import {
   MapPin,
   RefreshCw,
   Phone,
-  Mail
+  Mail,
+  Loader2,
+  DollarSign,
+  Image as ImageIcon,
+  UploadCloud
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchProperties } from '../services/api';
+import { fetchProperties, updateProperty, deleteProperty, uploadPropertyImages } from '../services/api';
 import AdminLayout from '../components/admin/AdminLayout';
 
 export default function AdminDashboardPage() {
@@ -46,6 +51,16 @@ export default function AdminDashboardPage() {
   const [editingId, setEditingId] = useState(null);
   const [editPrice, setEditPrice] = useState(0);
   const [savingId, setSavingId] = useState(null);
+
+  // Property Edit & Delete state
+  const [editingProperty, setEditingProperty] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [savingProperty, setSavingProperty] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [editUploading, setEditUploading] = useState(false);
+  const [editUploadError, setEditUploadError] = useState('');
+  const [editImageUrlInput, setEditImageUrlInput] = useState('');
+  const editFileInputRef = React.useRef(null);
 
   // Active view determination from pathname
   const currentPath = location.pathname;
@@ -107,6 +122,190 @@ export default function AdminDashboardPage() {
       alert(`Error updating benchmark: ${err.message}`);
     } finally {
       setSavingId(null);
+    }
+  };
+
+  // Property Edit Handlers
+  const handleOpenEdit = (prop) => {
+    setEditingProperty(prop);
+    setEditUploadError('');
+    setEditImageUrlInput('');
+    setEditForm({
+      title_en: prop.title_en || prop.titleEn || '',
+      title_ar: prop.title_ar || prop.titleAr || '',
+      description_en: prop.description_en || prop.descriptionEn || '',
+      description_ar: prop.description_ar || prop.descriptionAr || '',
+      purpose: prop.purpose || 'sale',
+      category: prop.category || 'residential',
+      property_type: prop.property_type || prop.propertyType || 'apartment',
+      price: prop.price || '',
+      area_sqm: prop.area_sqm || prop.areaSqm || '',
+      bedrooms: prop.bedrooms ?? 3,
+      bathrooms: prop.bathrooms ?? 2,
+      floor_level: prop.floor_level ?? prop.floorLevel ?? 1,
+      finishing_type: prop.finishing_type || prop.finishingType || 'fully_finished',
+      delivery_status: prop.delivery_status || prop.deliveryStatus || 'ready',
+      delivery_year: prop.delivery_year || prop.deliveryYear || 2026,
+      payment_type: prop.payment_type || prop.paymentType || 'cash',
+      down_payment: prop.down_payment || prop.downPayment || '',
+      installment_years: prop.installment_years || prop.installmentYears || 0,
+      monthly_installment: prop.monthly_installment || prop.monthlyInstallment || '',
+      city: prop.city || 'Cairo',
+      district: prop.district || '',
+      compound: prop.compound || '',
+      address: prop.address || '',
+      images: Array.isArray(prop.images) ? [...prop.images] : (Array.isArray(prop.images_json) ? [...prop.images_json] : []),
+      amenities: Array.isArray(prop.amenities) ? [...prop.amenities] : ['Security', 'Parking'],
+      status: prop.status || 'published',
+      featured: Boolean(prop.featured)
+    });
+  };
+
+  const handleEditFilesSelected = async (fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    setEditUploadError('');
+
+    const currentCount = editForm?.images?.length || 0;
+    if (currentCount >= 5) {
+      setEditUploadError(isRTL ? 'الحد الأقصى هو 5 صور.' : 'Maximum 5 images allowed.');
+      return;
+    }
+
+    const availableSlots = 5 - currentCount;
+    const filesToProcess = Array.from(fileList).slice(0, availableSlots);
+
+    const validFiles = [];
+    for (const file of filesToProcess) {
+      const isImg = file.type?.startsWith('image/') || /\.(jpg|jpeg|png|webp|avif|heic|heif|jfif|gif|bmp|tiff|svg)$/i.test(file.name);
+      if (!isImg) {
+        setEditUploadError(isRTL ? 'يُسمح برفع ملفات الصور فقط.' : 'Only image files are allowed.');
+        return;
+      }
+      if (file.size > 15 * 1024 * 1024) {
+        setEditUploadError(isRTL ? 'حجم الصورة يجب ألا يتجاوز 15 ميجابايت.' : 'Image file size cannot exceed 15MB.');
+        return;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    setEditUploading(true);
+    try {
+      const uploadedUrls = await uploadPropertyImages(validFiles);
+      setEditForm(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...uploadedUrls].slice(0, 5)
+      }));
+    } catch (err) {
+      setEditUploadError(err.message || (isRTL ? 'فشل رفع الصور.' : 'Failed to upload images.'));
+    } finally {
+      setEditUploading(false);
+      if (editFileInputRef.current) editFileInputRef.current.value = '';
+    }
+  };
+
+  const handleAddEditImageUrl = () => {
+    if (!editImageUrlInput.trim()) return;
+    if ((editForm?.images?.length || 0) >= 5) {
+      setEditUploadError(isRTL ? 'الحد الأقصى هو 5 صور.' : 'Maximum 5 images allowed.');
+      return;
+    }
+    setEditForm(prev => ({
+      ...prev,
+      images: [...(prev.images || []), editImageUrlInput.trim()]
+    }));
+    setEditImageUrlInput('');
+    setEditUploadError('');
+  };
+
+  const handleRemoveEditImage = (idx) => {
+    setEditForm(prev => ({
+      ...prev,
+      images: (prev.images || []).filter((_, i) => i !== idx)
+    }));
+    setEditUploadError('');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm || !editingProperty) return;
+    const priceNum = Number(editForm.price) || 0;
+    const areaNum = Number(editForm.area_sqm) || 0;
+
+    if (!editForm.title_en?.trim()) {
+      alert(isRTL ? 'يرجى إدخال عنوان العقار' : 'Please enter property title');
+      return;
+    }
+    if (priceNum <= 0) {
+      alert(isRTL ? 'يرجى إدخال سعر صحيح أكبر من الصفر' : 'Please enter a valid price greater than zero');
+      return;
+    }
+    if (areaNum <= 0) {
+      alert(isRTL ? 'يرجى إدخال مساحة صحيحة أكبر من الصفر' : 'Please enter a valid area greater than zero');
+      return;
+    }
+
+    setSavingProperty(true);
+    try {
+      const payload = {
+        title_en: editForm.title_en.trim(),
+        title_ar: editForm.title_ar?.trim() || editForm.title_en.trim(),
+        description_en: editForm.description_en?.trim() || '',
+        description_ar: editForm.description_ar?.trim() || editForm.description_en?.trim() || '',
+        purpose: editForm.purpose || 'sale',
+        category: editForm.category || 'residential',
+        property_type: editForm.property_type || 'apartment',
+        price: priceNum,
+        area_sqm: areaNum,
+        bedrooms: Number(editForm.bedrooms) || 0,
+        bathrooms: Number(editForm.bathrooms) || 0,
+        floor_level: Number(editForm.floor_level) || 1,
+        finishing_type: editForm.finishing_type || 'fully_finished',
+        delivery_status: editForm.delivery_status || 'ready',
+        delivery_year: Number(editForm.delivery_year) || 2026,
+        payment_type: editForm.payment_type || 'cash',
+        down_payment: editForm.payment_type === 'installments' ? (Number(editForm.down_payment) || 0) : 0,
+        installment_years: editForm.payment_type === 'installments' ? (Number(editForm.installment_years) || 0) : 0,
+        monthly_installment: editForm.payment_type === 'installments' ? (Number(editForm.monthly_installment) || 0) : 0,
+        city: editForm.city || 'Cairo',
+        district: editForm.district?.trim() || '',
+        compound: editForm.compound?.trim() || '',
+        address: editForm.address?.trim() || '',
+        images: editForm.images && editForm.images.length > 0 ? editForm.images : [],
+        amenities: editForm.amenities || ['Security', 'Parking'],
+        status: editForm.status || 'published',
+        featured: Boolean(editForm.featured)
+      };
+
+      const res = await updateProperty(editingProperty.id, payload);
+      setProperties(prev => prev.map(p => p.id === editingProperty.id ? res.data : p));
+      setEditingProperty(null);
+      setEditForm(null);
+      alert(isRTL ? 'تم حفظ التعديلات بنجاح!' : 'Property updated successfully!');
+      loadData();
+    } catch (err) {
+      alert((isRTL ? 'فشل تحديث العقار: ' : 'Failed to update property: ') + err.message);
+    } finally {
+      setSavingProperty(false);
+    }
+  };
+
+  const handleDeleteProperty = async (id, title) => {
+    const confirmMsg = isRTL 
+      ? `هل أنت متأكد من رغبتك في حذف العقار "${title}" نهائياً من قاعدة البيانات؟`
+      : `Are you sure you want to permanently delete property "${title}" from the database?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setDeletingId(id);
+    try {
+      await deleteProperty(id);
+      setProperties(prev => prev.filter(p => p.id !== id));
+      alert(isRTL ? 'تم حذف العقار بنجاح!' : 'Property deleted successfully!');
+      loadData();
+    } catch (err) {
+      alert((isRTL ? 'فشل حذف العقار: ' : 'Failed to delete property: ') + err.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -317,14 +516,42 @@ export default function AdminDashboardPage() {
                     </span>
                   </td>
                   <td className="p-3.5 text-end">
-                    <Link
-                      to={`/property/${prop.id}`}
-                      target="_blank"
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold inline-flex items-center gap-1 transition-colors"
-                    >
-                      <span>{isRTL ? 'معاينة' : 'View'}</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                      <Link
+                        to={`/property/${prop.id}`}
+                        target="_blank"
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold inline-flex items-center gap-1 transition-colors"
+                        title={isRTL ? 'معاينة العقار' : 'View Property'}
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{isRTL ? 'معاينة' : 'View'}</span>
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(prop)}
+                        className="px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] font-bold inline-flex items-center gap-1 transition-colors border border-sky-200/60"
+                        title={isRTL ? 'تعديل العقار' : 'Edit Property'}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>{isRTL ? 'تعديل' : 'Edit'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProperty(prop.id, isRTL ? prop.title_ar || prop.title_en : prop.title_en || prop.title_ar)}
+                        disabled={deletingId === prop.id}
+                        className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold inline-flex items-center gap-1 transition-colors border border-rose-200/60 disabled:opacity-50"
+                        title={isRTL ? 'حذف العقار' : 'Delete Property'}
+                      >
+                        {deletingId === prop.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isRTL ? 'حذف' : 'Delete'}</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -595,6 +822,422 @@ export default function AdminDashboardPage() {
       {currentPath === '/admin/benchmarks' && renderBenchmarksSection(false)}
       {currentPath === '/admin/reports' && renderStandardServiceView('Reports & Analytics', 'التقارير والتحليلات', BarChart3, 'Comprehensive platform metrics, regional price index trends, and activity', 'تقارير أداء المنصة وتحليلات مؤشرات أسعار المحافظات المصرية', properties.length)}
       {currentPath === '/admin/settings' && renderSettingsView()}
+
+      {/* Edit Property Modal */}
+      {editingProperty && editForm && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100 font-bold">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#0B1C3D]">
+                    {isRTL ? `تعديل العقار #${editingProperty.id}` : `Edit Property #${editingProperty.id}`}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {isRTL ? 'تعديل السعر والصور والمواصفات وحالة العرض' : 'Update property price, images, specifications, and display status'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => { setEditingProperty(null); setEditForm(null); }}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <div className="space-y-6">
+
+              {/* 1. Basic Info */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D]">
+                  {isRTL ? '1. البيانات الأساسية' : '1. Basic Information'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'العنوان (إنجليزي)' : 'Title (English)'}</label>
+                    <input
+                      type="text"
+                      value={editForm.title_en}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, title_en: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'العنوان (عربي)' : 'Title (Arabic)'}</label>
+                    <input
+                      type="text"
+                      value={editForm.title_ar}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, title_ar: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'الغرض' : 'Purpose'}</label>
+                    <select
+                      value={editForm.purpose}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, purpose: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="sale">For Sale (للبيع)</option>
+                      <option value="rent">For Rent (للإيجار)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'القسم' : 'Category'}</label>
+                    <select
+                      value={editForm.category}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="residential">Residential (سكني)</option>
+                      <option value="commercial">Commercial (تجاري/إداري)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'نوع العقار' : 'Property Type'}</label>
+                    <select
+                      value={editForm.property_type}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, property_type: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="apartment">Apartment (شقة)</option>
+                      <option value="villa">Villa (فيلا)</option>
+                      <option value="twin_house">Twin House</option>
+                      <option value="townhouse">Townhouse</option>
+                      <option value="duplex">Duplex</option>
+                      <option value="chalet">Chalet</option>
+                      <option value="office">Office</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Pricing & Financing */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D]">
+                  {isRTL ? '2. السعر وخيارات السداد' : '2. Pricing & Financing'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'السعر (جنيه)' : 'Price (EGP)'}</label>
+                    <input
+                      type="number"
+                      value={editForm.price}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, price: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'المساحة (م²)' : 'Area (SQM)'}</label>
+                    <input
+                      type="number"
+                      value={editForm.area_sqm}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, area_sqm: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'طريقة السداد' : 'Payment Type'}</label>
+                    <select
+                      value={editForm.payment_type}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, payment_type: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="cash">Cash (كاش)</option>
+                      <option value="installments">Installments (تقسيط)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {editForm.payment_type === 'installments' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/70">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'المقدم (جنيه)' : 'Down Payment (EGP)'}</label>
+                      <input
+                        type="number"
+                        value={editForm.down_payment}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, down_payment: e.target.value }))}
+                        className="w-full p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'مدة التقسيط (سنوات)' : 'Installment Years'}</label>
+                      <input
+                        type="number"
+                        value={editForm.installment_years}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, installment_years: e.target.value }))}
+                        className="w-full p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'القسط الشهري (جنيه)' : 'Monthly Installment (EGP)'}</label>
+                      <input
+                        type="number"
+                        value={editForm.monthly_installment}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, monthly_installment: e.target.value }))}
+                        className="w-full p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-900"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Specs */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D]">
+                  {isRTL ? '3. مواصفات الوحدة' : '3. Unit Specifications'}
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'غرف النوم' : 'Bedrooms'}</label>
+                    <select
+                      value={editForm.bedrooms}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, bedrooms: Number(e.target.value) }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6, 7].map(n => <option key={n} value={n}>{n} Beds</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'الحمامات' : 'Bathrooms'}</label>
+                    <select
+                      value={editForm.bathrooms}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, bathrooms: Number(e.target.value) }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Baths</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'الطابق' : 'Floor Level'}</label>
+                    <input
+                      type="number"
+                      value={editForm.floor_level}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, floor_level: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'التشطيب' : 'Finishing'}</label>
+                    <select
+                      value={editForm.finishing_type}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, finishing_type: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="fully_finished">Fully Finished</option>
+                      <option value="ultra_lux">Ultra Lux</option>
+                      <option value="semi_finished">Semi Finished</option>
+                      <option value="core_shell">Core & Shell</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Location */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D]">
+                  {isRTL ? '4. الموقع' : '4. Location'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'المدينة' : 'City'}</label>
+                    <select
+                      value={editForm.city}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="Cairo">Cairo (القاهرة)</option>
+                      <option value="Giza">Giza (الجيزة)</option>
+                      <option value="Matrouh">North Coast (الساحل)</option>
+                      <option value="Red Sea">El Gouna (الجونة)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'المنطقة' : 'District'}</label>
+                    <input
+                      type="text"
+                      value={editForm.district}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, district: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'الكمبوند' : 'Compound'}</label>
+                    <input
+                      type="text"
+                      value={editForm.compound}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, compound: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Images (Up to 5 images) */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#0B1C3D] flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-sky-600" />
+                      <span>{isRTL ? '5. صور العقار (حتى 5 صور)' : '5. Property Images (Up to 5 photos)'}</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      {isRTL ? 'يمكنك رفع صور جديدة أو حذف أي صورة موجودة.' : 'Upload new photos or remove existing ones.'}
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold border bg-sky-50 text-sky-700 border-sky-200">
+                    {(editForm.images?.length || 0)} / 5 {isRTL ? 'صور' : 'Images'}
+                  </span>
+                </div>
+
+                {editUploadError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                    <span>{editUploadError}</span>
+                  </div>
+                )}
+
+                {/* Existing Images Thumbnails */}
+                {editForm.images && editForm.images.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {editForm.images.map((imgUrl, idx) => (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 h-24 bg-slate-100">
+                        <img
+                          src={imgUrl}
+                          alt={`Property ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80'; }}
+                        />
+                        <span className="absolute top-1 start-1 px-1.5 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-bold">
+                          #{idx + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditImage(idx)}
+                          className="absolute top-1 end-1 w-6 h-6 rounded-md bg-rose-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity shadow-sm"
+                          title={isRTL ? 'حذف الصورة' : 'Remove Image'}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload More Button if under 5 */}
+                {(editForm.images?.length || 0) < 5 && (
+                  <div className="space-y-3">
+                    <div
+                      onClick={() => editFileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-200 hover:border-sky-400 rounded-2xl p-4 text-center cursor-pointer transition-colors bg-slate-50/50 hover:bg-slate-50"
+                    >
+                      <input
+                        ref={editFileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleEditFilesSelected(e.target.files)}
+                      />
+                      <div className="flex items-center justify-center gap-2 text-sky-600 text-xs font-bold">
+                        {editUploading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <UploadCloud className="w-4 h-4" />
+                        )}
+                        <span>{editUploading ? (isRTL ? 'جاري رفع الصور...' : 'Uploading...') : (isRTL ? 'اضغط لاختيار صور من جهازك' : 'Click to upload photos from device')}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={editImageUrlInput}
+                        onChange={(e) => setEditImageUrlInput(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="flex-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEditImageUrl}
+                        className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                      >
+                        {isRTL ? 'إضافة رابط' : 'Add URL'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 6. Status & Featured */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'حالة النشر' : 'Status'}</label>
+                    <select
+                      value={editForm.status}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+                    >
+                      <option value="published">Published (منشور)</option>
+                      <option value="pending_review">Pending Review (قيد المراجعة)</option>
+                      <option value="archived">Archived (مؤرشف)</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-4 sm:pt-6">
+                    <label className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.featured}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, featured: e.target.checked }))}
+                        className="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500"
+                      />
+                      <span className="text-xs font-bold text-slate-800">
+                        {isRTL ? 'تثبيت كعقار مميز في الصفحة الرئيسية (Featured)' : 'Feature on Homepage (Featured)'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => { setEditingProperty(null); setEditForm(null); }}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+              >
+                {isRTL ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={savingProperty}
+                onClick={handleSaveEdit}
+                className="px-5 py-2.5 rounded-xl bg-[#0B1C3D] hover:bg-[#162F5E] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs disabled:opacity-50"
+              >
+                {savingProperty ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                <span>{savingProperty ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ التعديلات' : 'Save Changes')}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
