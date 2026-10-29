@@ -334,29 +334,29 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Card 3: Smart Map Search */}
+          {/* Card 3: Property Management */}
           <Link
-            to="/search?view=map"
+            to="/management"
             className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 group text-left"
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80"
-                alt="Smart Map Search"
+                src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=600&q=80"
+                alt="Property Management"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
             <div className="flex-1 space-y-2">
               <h3 className="text-lg sm:text-xl font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors">
-                {isRTL ? 'البحث الذكي بالخريطة' : 'Smart Map Search'}
+                {isRTL ? 'إدارة وتشغيل الأملاك' : 'Property Management'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 {isRTL 
-                  ? 'حدد نطاق بحثك على الخريطة واكتشف العقارات المتاحة في الأماكن التي تريد السكن فيها.'
-                  : 'Draw your search area on the map and discover properties exactly where you want to live.'}
+                  ? 'خدمات إدارة متكاملة تشمل تأجير الوحدات، تحصيل الإيجارات، والصيانة الدورية بأعلى عائد استثماري.'
+                  : 'Full-service asset management covering tenant screening, rent collection, and periodic maintenance.'}
               </p>
               <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0B1C3D] group-hover:text-sky-600 transition-colors pt-1">
-                <span>{isRTL ? 'استكشف بحث الخريطة' : 'Explore Map Search'}</span>
+                <span>{isRTL ? 'طلب إدارة أملاك' : 'Manage My Property'}</span>
                 <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${isRTL ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
               </div>
             </div>

@@ -71,8 +71,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/search?view=map" className="hover:text-sky-600 transition-colors font-medium">
-                  {isRTL ? 'البحث بالخريطة التفاعلية' : 'Interactive Map Search'}
+                <Link to="/search" className="hover:text-sky-600 transition-colors font-medium">
+                  {isRTL ? 'محرك البحث المتقدم' : 'Advanced Search'}
                 </Link>
               </li>
             </ul>

@@ -223,7 +223,7 @@ export default function AddPropertyPage() {
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
             {isRTL 
-              ? 'سجل مواصفات وحدتك وسيتم فحصها ونشرها فوراً على خريطة ومحرك بحث عقار إن (AQAR IN).'
+              ? 'سجل مواصفات وحدتك وسيتم فحصها ونشرها فوراً على منصة ومحرك بحث عقار إن (AQAR IN).'
               : 'Fill in your property specifications to publish it immediately on Egypt\'s premier AQAR IN intelligence network.'}
           </p>
         </div>
