@@ -53,6 +53,25 @@ export async function submitPropertyListing(propertyData) {
 
 export const createProperty = submitPropertyListing;
 
+// Upload property images (up to 5 images)
+export async function uploadPropertyImages(files) {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('images', files[i]);
+  }
+
+  const res = await fetch(`${API_BASE_URL}/upload/multiple`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to upload images');
+  }
+  return data.urls;
+}
+
 // 2. Leads & Inquiries API
 export async function submitPropertyInquiry(inquiry) {
   const res = await fetch(`${API_BASE_URL}/leads/property-inquiry`, {

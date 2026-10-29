@@ -231,7 +231,27 @@ async function runTests() {
     }
   });
 
-  // 15. Lead Inquiry
+  // 15. Upload up to 5 property images
+  let uploadedImageUrls = [];
+  await test('POST /api/upload/multiple (Uploads up to 5 images for properties)', async () => {
+    const formData = new FormData();
+    for (let i = 1; i <= 3; i++) {
+      const dummyBlob = new Blob(['fake image content ' + i], { type: 'image/jpeg' });
+      formData.append('images', dummyBlob, `test-image-${i}.jpg`);
+    }
+
+    const res = await fetch(`${BASE_URL}/upload/multiple`, {
+      method: 'POST',
+      body: formData
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success || json.count !== 3 || !Array.isArray(json.urls)) {
+      throw new Error(`Multiple image upload failed: ${JSON.stringify(json)}`);
+    }
+    uploadedImageUrls = json.urls;
+  });
+
+  // 16. Lead Inquiry
   await test('POST /api/leads/property-inquiry (Inserts lead into PostgreSQL)', async () => {
     const res = await fetch(`${BASE_URL}/leads/property-inquiry`, {
       method: 'POST',
