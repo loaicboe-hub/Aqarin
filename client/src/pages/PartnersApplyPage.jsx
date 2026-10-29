@@ -11,6 +11,7 @@ import {
   Phone 
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { submitPartnerApplication } from '../services/api';
 
 export default function PartnersApplyPage() {
   const { isRTL } = useLanguage();
@@ -25,14 +26,20 @@ export default function PartnersApplyPage() {
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+    try {
+      await submitPartnerApplication(form);
       setSubmitted(true);
-    }, 800);
+    } catch (err) {
+      setError(err.message || (isRTL ? 'فشل إرسال الطلب' : 'Failed to submit application'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,6 +99,11 @@ export default function PartnersApplyPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">{isRTL ? 'اسم المسؤول' : 'Contact Person'}</label>
