@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import BrandLogo from './BrandLogo';
+import { SITE_CONFIG } from '../../config/siteConfig';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -139,9 +140,21 @@ export default function Navbar() {
 
           </nav>
 
-          {/* Right Actions (Language, Auth, + Add Property CTA) */}
+          {/* Right Actions (WhatsApp Hotline, Language, Auth, + Add Property CTA) */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
             
+            {/* WhatsApp direct hotline button */}
+            <a
+              href={SITE_CONFIG.getWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden xl:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/90 transition-all hover:scale-105 shadow-2xs"
+              title="WhatsApp: +201004491026"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="font-mono" dir="ltr">{SITE_CONFIG.phoneDisplay}</span>
+            </a>
+
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
@@ -277,6 +290,20 @@ export default function Navbar() {
               <Briefcase className="w-4 h-4 text-indigo-600" />
               <span>{isRTL ? '8. إدارة الأملاك' : '8. Management'}</span>
             </Link>
+
+            {/* Direct WhatsApp Call/Chat */}
+            <a
+              href={SITE_CONFIG.getWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 bg-emerald-50 text-emerald-800 rounded-xl flex items-center justify-between font-bold border border-emerald-200 mt-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>{isRTL ? 'تواصل معنا واتساب' : 'WhatsApp Support'}</span>
+              </div>
+              <span className="font-mono text-xs" dir="ltr">{SITE_CONFIG.phoneDisplay}</span>
+            </a>
           </div>
         </div>
       )}

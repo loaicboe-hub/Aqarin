@@ -546,25 +546,6 @@ export default function HomePage() {
           })}
         </div>
       </section>
-
-      {/* ==========================================================
-          6. FLOATING ACTION BUTTON
-          - WhatsApp Floating Button
-      ========================================================== */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-        
-        {/* WhatsApp Circular Floating Button */}
-        <a
-          href={SITE_CONFIG.getWhatsAppUrl('Hello, I have an inquiry about AQAR IN')}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
-          title="Chat on WhatsApp"
-        >
-          <MessageSquareShare className="w-6 h-6" />
-        </a>
-      </div>
-
     </div>
   );
 }

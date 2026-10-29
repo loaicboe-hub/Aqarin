@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
+import FloatingWhatsApp from './components/common/FloatingWhatsApp';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -95,6 +96,7 @@ export default function App() {
       </main>
 
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <FloatingWhatsApp />}
     </div>
   );
 }

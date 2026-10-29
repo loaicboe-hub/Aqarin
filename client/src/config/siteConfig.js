@@ -8,13 +8,13 @@ export const SITE_CONFIG = {
   taglineEn: 'Egypt\'s Premier Real Estate Exchange, Liquidation & Investment Platform',
   
   // Official Hotlines & Support Contacts
-  phone: '+201002223344',
-  phoneDisplay: '+20 100 222 3344',
-  whatsappNumber: '201002223344',
-  whatsappDisplay: '+20 100 222 3344',
-  email: 'contact@aqarin.com',
-  supportEmail: 'support@aqarin.com',
-  adminEmail: 'admin@aqarin.com',
+  phone: '+201004491026',
+  phoneDisplay: '+20 100 449 1026',
+  whatsappNumber: '201004491026',
+  whatsappDisplay: '+20 100 449 1026',
+  email: 'contact@aqaarin.com',
+  supportEmail: 'support@aqaarin.com',
+  adminEmail: 'm.khaled27091990@gmail.com',
 
   // Headquarters
   addressAr: 'مبنى رجال الأعمال، شارع التسعين الشمالي، التجمع الخامس، القاهرة الجديدة',
