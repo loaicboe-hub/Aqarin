@@ -31,7 +31,8 @@ import {
   Bot,
   ArrowLeftRight,
   Paintbrush,
-  Tag
+  Tag,
+  Palmtree
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchProperties } from '../services/api';
@@ -371,24 +372,26 @@ export default function HomePage() {
 
             </div>
 
-            {/* Bottom Navy Section (Fast Sell Action Banner) */}
+            {/* Bottom Navy Section (Vacation on Installments Banner) */}
             <div className="bg-[#0B1C3D] p-5 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                  {isRTL ? 'تريد بيع عقارك بأسرع وقت؟' : 'Need to Sell Your Property Fast?'}
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                  <Palmtree className="w-5 h-5 text-emerald-400" />
+                  {isRTL ? 'قضي أجازتك بالتقسيط' : 'Spend Your Vacation on Installments'}
                 </h3>
                 <p className="text-xs text-slate-300">
-                  {isRTL ? 'احصل على عرض شراء كاش مباشر خلال 72 ساعة بدون عمولات.' : 'Get a direct cash purchase offer within 72 hours with zero brokerage fees.'}
+                  {isRTL 
+                    ? 'شاليهات وفلل مصيفية في الساحل الشمالي والعين السخنة ورأس الحكمة بأسهل خطط سداد وبدون فوائد.' 
+                    : 'Luxury chalets & beachfront villas in North Coast & Sokhna with zero-interest installments.'}
                 </p>
               </div>
 
-              {/* White Pill Button: Fast Sell */}
+              {/* White Pill Button: Vacation on Installments */}
               <Link
-                to="/fast-sell"
+                to="/search?search=chalet"
                 className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-[#0B1C3D] text-xs sm:text-sm font-extrabold shadow-sm shrink-0 transition-transform hover:scale-105"
               >
-                {isRTL ? 'بيع عقارك كاش' : 'Sell Fast for Cash'}
+                {isRTL ? 'احجز شاليهك الآن' : 'Book on Installments'}
               </Link>
             </div>
 
