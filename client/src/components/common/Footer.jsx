@@ -5,7 +5,6 @@ import {
   MapPin, 
   Phone, 
   Mail, 
-  ShieldCheck, 
   ExternalLink,
   Heart,
   Zap,
@@ -157,13 +156,6 @@ export default function Footer() {
             </Link>
             <Link to="/partners/apply" className="hover:text-sky-700 font-bold text-[#0B1C3D]">
               {isRTL ? 'انضم كشريك' : 'Partner with Us'}
-            </Link>
-            <Link 
-              to="/admin" 
-              className="px-2.5 py-1 rounded-md text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/80 hover:bg-amber-100 hover:border-amber-300 transition-all flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-              <span>{isRTL ? 'لوحة تحكم الإدارة' : 'Admin Portal'}</span>
             </Link>
           </div>
         </div>
