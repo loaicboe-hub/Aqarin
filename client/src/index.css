@@ -44,6 +44,14 @@
   .bg-navy {
     background-color: #0B1C3D;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Leaflet Map Customization */

@@ -28,7 +28,10 @@ import {
   Key,
   Award,
   ChevronDown,
-  Bot
+  Bot,
+  ArrowLeftRight,
+  Paintbrush,
+  Tag
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { fetchProperties } from '../services/api';
@@ -70,15 +73,45 @@ export default function HomePage() {
     ? popularHotspots
     : popularHotspots.filter(h => h.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  // 6 Core Services for Mobile & Desktop
+  const serviceTabs = [
+    { id: 'buy', labelAr: 'شراء', labelEn: 'Buy', icon: HomeIcon, path: '/buy' },
+    { id: 'sell', labelAr: 'بيع', labelEn: 'Sell', icon: Tag, path: '/sell' },
+    { id: 'rent', labelAr: 'إيجار', labelEn: 'Rent', icon: Key, path: '/rent' },
+    { id: 'exchange', labelAr: 'تبادل عقاري', labelEn: 'Exchange', icon: ArrowLeftRight, path: '/exchange' },
+    { id: 'management', labelAr: 'إدارة', labelEn: 'Management', icon: Briefcase, path: '/management' },
+    { id: 'finishing', labelAr: 'تشطيبات', labelEn: 'Finishing', icon: Paintbrush, path: '/finishing' },
+  ];
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate(`/search?purpose=${activeTab === 'rent' ? 'rent' : 'sale'}&search=${encodeURIComponent(searchQuery || '5th Settlement')}`);
+    if (activeTab === 'rent') {
+      navigate(`/search?purpose=rent&search=${encodeURIComponent(searchQuery || 'Maadi')}`);
+    } else if (activeTab === 'exchange') {
+      navigate(`/exchange${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`);
+    } else if (activeTab === 'sell') {
+      navigate(`/sell${searchQuery ? `?location=${encodeURIComponent(searchQuery)}` : ''}`);
+    } else if (activeTab === 'management') {
+      navigate('/management');
+    } else if (activeTab === 'finishing') {
+      navigate('/finishing');
+    } else {
+      navigate(`/search?purpose=sale&search=${encodeURIComponent(searchQuery || '5th Settlement')}`);
+    }
   };
 
   const handleSelectHotspot = (item) => {
     setSearchQuery(item);
     setSearchFocused(false);
-    navigate(`/search?purpose=${activeTab === 'rent' ? 'rent' : 'sale'}&search=${encodeURIComponent(item)}`);
+    if (activeTab === 'rent') {
+      navigate(`/search?purpose=rent&search=${encodeURIComponent(item)}`);
+    } else if (activeTab === 'exchange') {
+      navigate(`/exchange?search=${encodeURIComponent(item)}`);
+    } else if (activeTab === 'sell') {
+      navigate(`/sell?location=${encodeURIComponent(item)}`);
+    } else {
+      navigate(`/search?purpose=sale&search=${encodeURIComponent(item)}`);
+    }
   };
 
   const marketBenchmarks = [
@@ -150,86 +183,185 @@ export default function HomePage() {
           <div ref={searchBoxRef} className="relative z-30 w-full max-w-2xl mx-auto text-left shadow-2xl rounded-3xl overflow-hidden">
             
             {/* Top White Section */}
-            <div className="bg-white p-5 sm:p-6 pb-6 space-y-4">
+            <div className="bg-white p-4 sm:p-6 pb-6 space-y-4">
               
-              {/* Tabs Row */}
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                
-                {/* Left Tabs: Buy / Rent */}
-                <div className="flex items-center gap-6 text-xs sm:text-sm font-bold text-slate-600">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('buy')}
-                    className={`relative pb-1.5 transition-colors ${
-                      activeTab === 'buy' ? 'text-[#0B1C3D] font-extrabold' : 'hover:text-[#0B1C3D]'
-                    }`}
-                  >
-                    <span>{isRTL ? 'شراء' : 'Buy'}</span>
-                    {activeTab === 'buy' && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('rent')}
-                    className={`relative pb-1.5 transition-colors ${
-                      activeTab === 'rent' ? 'text-[#0B1C3D] font-extrabold' : 'hover:text-[#0B1C3D]'
-                    }`}
-                  >
-                    <span>{isRTL ? 'إيجار' : 'Rent'}</span>
-                    {activeTab === 'rent' && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
-                    )}
-                  </button>
-                </div>
-
+              {/* Service Tabs Row (Mobile Friendly & Native App Feel - Exactly 6 Services) */}
+              <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar pb-1 text-xs sm:text-sm font-bold text-slate-600 border-b border-slate-100">
+                {serviceTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setSearchFocused(false);
+                      }}
+                      className={`relative pb-2 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                        isActive 
+                          ? 'text-[#0B1C3D] font-extrabold' 
+                          : 'hover:text-[#0B1C3D] text-slate-500'
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#0B1C3D]' : 'text-slate-400'}`} />
+                      <span>{isRTL ? tab.labelAr : tab.labelEn}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0B1C3D] rounded-full" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Main Search Input with Coral/Red Circular Search Button */}
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <div className="flex items-center bg-white rounded-full border border-slate-200 focus-within:border-slate-400 pl-5 pr-2 py-1.5 shadow-sm transition-all">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    placeholder={isRTL ? 'التجمع الخامس (5th Settlement)...' : '5th Settlement'}
-                    className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 outline-none"
-                  />
+              {/* Dynamic Interactive Box Content Based on Selected Tab */}
+              
+              {/* Tab 1, 2, 3: Search-Based (Buy, Rent, Exchange) */}
+              {(activeTab === 'buy' || activeTab === 'rent' || activeTab === 'exchange') && (
+                <form onSubmit={handleSearchSubmit} className="relative">
+                  <div className="flex items-center bg-white rounded-full border border-slate-200 focus-within:border-slate-400 pl-5 pr-2 py-1.5 shadow-sm transition-all">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      placeholder={
+                        activeTab === 'rent'
+                          ? (isRTL ? 'المعادي، التجمع، زايد... ابحث عن عقار للإيجار' : 'Maadi, 5th Settlement... search rentals')
+                          : activeTab === 'exchange'
+                          ? (isRTL ? 'ابحث في صفقات البدل (شقة بالتجمع، فيلا بزايد)...' : 'Search exchange deals (e.g. Villa in Zayed)...')
+                          : (isRTL ? 'التجمع الخامس (5th Settlement)... أو ابحث عن عقار للشراء' : '5th Settlement... search properties for sale')
+                      }
+                      className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 outline-none"
+                    />
 
-                  {/* Red / Coral Circular Search Button (Exact Match) */}
-                  <button
-                    type="submit"
-                    className="w-10 h-10 rounded-full bg-[#E11D48] hover:bg-[#BE123C] text-white flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Dropdown Auto-Suggestions */}
-                {searchFocused && (
-                  <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase">
-                      <span>{isRTL ? 'أشهر المناطق والكمبوندات' : 'Popular Locations'}</span>
-                      <button type="button" onClick={() => setSearchFocused(false)}>✕</button>
-                    </div>
-                    <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {filteredHotspots.map((item, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSelectHotspot(item)}
-                          className="w-full text-left p-2 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-800 flex items-center gap-2"
-                        >
-                          <MapPin className="w-3.5 h-3.5 text-sky-500" />
-                          <span>{item}</span>
-                        </button>
-                      ))}
-                    </div>
+                    {/* Red / Coral Circular Search Button (Exact Match) */}
+                    <button
+                      type="submit"
+                      className="w-10 h-10 rounded-full bg-[#E11D48] hover:bg-[#BE123C] text-white flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105"
+                      title={isRTL ? 'بحث' : 'Search'}
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
-              </form>
+
+                  {/* Dropdown Auto-Suggestions */}
+                  {searchFocused && (
+                    <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50">
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase">
+                        <span>{isRTL ? 'أشهر المناطق والكمبوندات' : 'Popular Locations'}</span>
+                        <button type="button" onClick={() => setSearchFocused(false)}>✕</button>
+                      </div>
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {filteredHotspots.map((item, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectHotspot(item)}
+                            className="w-full text-left p-2 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-800 flex items-center gap-2"
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-sky-500" />
+                            <span>{item}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </form>
+              )}
+
+              {/* Tab 4: Sell (بيع) */}
+              {activeTab === 'sell' && (
+                <div className="space-y-3">
+                  <div className="flex items-center bg-white rounded-full border border-slate-200 focus-within:border-slate-400 pl-4 pr-1.5 py-1.5 shadow-sm transition-all">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={isRTL ? 'أدخل عنوان أو منطقة عقارك للبدء في عرضه للبيع...' : 'Enter your property area or address to list...'}
+                      className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 outline-none px-2"
+                    />
+                    <Link
+                      to={`/sell${searchQuery ? `?location=${encodeURIComponent(searchQuery)}` : ''}`}
+                      className="h-10 px-5 rounded-full bg-[#E11D48] hover:bg-[#BE123C] text-white text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm transition-transform hover:scale-105"
+                    >
+                      <Tag className="w-3.5 h-3.5" />
+                      <span>{isRTL ? 'اعرض للبيع' : 'List for Sale'}</span>
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-2 pt-1 flex-wrap gap-2">
+                    <span>{isRTL ? 'تريد كاش فوري وتخليص إجراءات سريعة؟' : 'Need instant cash offer within 72 hours?'}</span>
+                    <Link to="/fast-sell" className="font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5 fill-current text-amber-500" />
+                      <span>{isRTL ? 'بيع سريع كاش 72 ساعة' : 'Fast Sell Cash (72h)'}</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 5: Management (إدارة) */}
+              {activeTab === 'management' && (
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="text-xs sm:text-sm font-bold text-[#0B1C3D] flex items-center gap-1.5">
+                      <Briefcase className="w-4 h-4 text-indigo-600" />
+                      <span>{isRTL ? 'إدارة وتأجير أملاكك الاستثمارية' : 'Property Management & Rental Yield'}</span>
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-500">
+                      {isRTL ? 'عقود موثقة، فحص للمستأجرين، تحصيل دوري وصيانة بأعلى عائد استثماري.' : 'Certified contracts, tenant vetting, rent collection & full maintenance.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <Link
+                      to="/management"
+                      className="flex-1 sm:flex-none px-4 py-2 rounded-full bg-[#0B1C3D] hover:bg-[#122B5C] text-white text-xs font-bold text-center shadow-xs transition-transform hover:scale-105"
+                    >
+                      {isRTL ? 'استكشف الباقات' : 'Explore Plans'}
+                    </Link>
+                    <a
+                      href={SITE_CONFIG.getWhatsAppUrl(isRTL ? 'مرحباً، أود الاستفسار عن باقات إدارة الأملاك.' : 'Hello, I want to inquire about Property Management.')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1 hover:bg-emerald-100 transition-colors shrink-0"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>{isRTL ? 'واتساب' : 'WhatsApp'}</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 6: Finishing (تشطيبات) */}
+              {activeTab === 'finishing' && (
+                <div className="bg-teal-50/60 rounded-2xl p-4 border border-teal-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="text-xs sm:text-sm font-bold text-teal-900 flex items-center gap-1.5">
+                      <Paintbrush className="w-4 h-4 text-teal-600" />
+                      <span>{isRTL ? 'حاسبة التشطيبات الذكية والديكور' : 'Smart Finishing Calculator & Interior'}</span>
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-slate-600">
+                      {isRTL ? 'احسب تكلفة تشطيب وحدتك فورياً (لوكس، سوبر لوكس، ألترا) مع ضمان تنفيذ معتمد.' : 'Calculate finishing cost instantly with certified execution warranty.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <Link
+                      to="/finishing"
+                      className="flex-1 sm:flex-none px-4 py-2 rounded-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold text-center shadow-xs transition-transform hover:scale-105"
+                    >
+                      {isRTL ? 'احسب التكلفة فوراً' : 'Calculate Cost'}
+                    </Link>
+                    <a
+                      href={SITE_CONFIG.getWhatsAppUrl(isRTL ? 'مرحباً، أود الاستفسار عن باقات التشطيب والمعاينة.' : 'Hello, I want to inquire about Finishing Services.')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 rounded-full bg-white text-teal-800 border border-teal-200 text-xs font-bold flex items-center gap-1 hover:bg-teal-100 transition-colors shrink-0"
+                    >
+                      <span>{isRTL ? 'طلب معاينة' : 'Inspection'}</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
             </div>
 
