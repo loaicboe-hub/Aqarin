@@ -27,7 +27,13 @@ export default function PropertyCard({ property }) {
     setIsFav(updated.includes(property.id));
   };
 
-  const pricePerSqm = Math.round(property.price / Math.max(1, property.areaSqm));
+  const area = property.areaSqm || property.area_sqm || 1;
+  const price = property.price || 0;
+  const pricePerSqm = Math.round(price / Math.max(1, area));
+
+  const title = isRTL 
+    ? (property.titleAr || property.title_ar || '') 
+    : (property.titleEn || property.title_en || '');
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden flex flex-col group relative border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300">
@@ -36,7 +42,7 @@ export default function PropertyCard({ property }) {
       <div className="relative h-60 w-full overflow-hidden bg-slate-100">
         <img
           src={property.images?.[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'}
-          alt={isRTL ? property.titleAr : property.titleEn}
+          alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
@@ -65,7 +71,7 @@ export default function PropertyCard({ property }) {
         {/* Score Badge */}
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 text-[#0B1C3D] text-xs font-extrabold shadow-sm backdrop-blur-md">
           <span className="text-[10px] text-emerald-700 font-bold">{isRTL ? 'مؤشر عقار' : 'Aqar Score'}</span>
-          <span className="text-emerald-600">{property.aqarScore || '9.4'}</span>
+          <span className="text-emerald-600">{property.aqarScore || property.aqar_score || '9.4'}</span>
           <span className="text-[10px] text-slate-400 font-normal">/10</span>
         </div>
 
@@ -100,7 +106,7 @@ export default function PropertyCard({ property }) {
           {/* Title */}
           <Link to={`/property/${property.id}`} className="block group-hover:text-sky-600 transition-colors">
             <h3 className="text-sm font-bold text-slate-800 line-clamp-1 leading-snug mb-3">
-              {isRTL ? property.titleAr : property.titleEn}
+              {title}
             </h3>
           </Link>
 
@@ -116,7 +122,7 @@ export default function PropertyCard({ property }) {
             </div>
             <div className="flex items-center gap-1.5">
               <Maximize2 className="w-4 h-4 text-sky-600" />
-              <span>{property.areaSqm} {isRTL ? 'م²' : 'm²'}</span>
+              <span>{area} {isRTL ? 'م²' : 'm²'}</span>
             </div>
           </div>
         </div>

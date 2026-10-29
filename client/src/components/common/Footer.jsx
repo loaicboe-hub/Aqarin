@@ -5,6 +5,7 @@ import {
   MapPin, 
   Phone, 
   Mail, 
+  ShieldCheck,
   ExternalLink,
   Heart,
   Zap,

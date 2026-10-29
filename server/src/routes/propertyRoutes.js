@@ -16,6 +16,26 @@ function normalizeJson(val, fallback = []) {
   return val;
 }
 
+function formatPropertyRow(p) {
+  if (!p) return null;
+  return {
+    ...p,
+    titleEn: p.title_en,
+    titleAr: p.title_ar,
+    descriptionEn: p.description_en,
+    descriptionAr: p.description_ar,
+    propertyType: p.property_type,
+    finishingType: p.finishing_type,
+    paymentType: p.payment_type,
+    areaSqm: Number(p.area_sqm),
+    aqarScore: Number(p.aqar_score),
+    viewsCount: Number(p.views_count),
+    price: Number(p.price),
+    images: normalizeJson(p.images_json),
+    amenities: normalizeJson(p.amenities_json)
+  };
+}
+
 // 1. Get all properties with filtering, search, pagination, sorting, and PostGIS spatial queries
 router.get('/', async (req, res) => {
   try {
@@ -143,11 +163,7 @@ router.get('/', async (req, res) => {
 
     const { rows } = await pool.query(query, params);
 
-    const properties = rows.map(p => ({
-      ...p,
-      images: normalizeJson(p.images_json),
-      amenities: normalizeJson(p.amenities_json)
-    }));
+    const properties = rows.map(formatPropertyRow);
 
     res.json({ success: true, count: properties.length, data: properties });
   } catch (err) {
@@ -169,24 +185,15 @@ router.get('/:id', async (req, res) => {
     // Increment views count asynchronously
     pool.query('UPDATE properties SET views_count = views_count + 1 WHERE id = $1', [id]).catch(console.error);
 
-    const prop = rows[0];
-    const property = {
-      ...prop,
-      images: normalizeJson(prop.images_json),
-      amenities: normalizeJson(prop.amenities_json)
-    };
+    const property = formatPropertyRow(rows[0]);
 
     // Get 3 similar properties in the same district, city or category
     const { rows: similarRows } = await pool.query(
       'SELECT * FROM properties WHERE id != $1 AND (district = $2 OR city = $3 OR property_type = $4) LIMIT 3',
-      [id, prop.district, prop.city, prop.property_type]
+      [id, property.district, property.city, property.property_type]
     );
 
-    const similarProperties = similarRows.map(p => ({
-      ...p,
-      images: normalizeJson(p.images_json),
-      amenities: normalizeJson(p.amenities_json)
-    }));
+    const similarProperties = similarRows.map(formatPropertyRow);
 
     res.json({ success: true, data: property, similar: similarProperties });
   } catch (err) {
