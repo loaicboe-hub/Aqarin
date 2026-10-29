@@ -74,14 +74,14 @@ export const INITIAL_PROPERTIES = [
     lng: 31.4833,
     aqarScore: 9.4,
     images: [
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Lagoon View', 'Central AC', 'Underground Parking', 'Clubhouse Access', '24/7 Security', 'Elevator', 'Smart Home Ready'],
     featured: true,
     viewsCount: 428,
-    owner: { name: 'Emaar Signature Real Estate', phone: '+201012345678', whatsapp: '+201012345678', verified: true }
+    owner: { name: 'Emaar Signature Real Estate', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   },
   {
     id: 2,
@@ -112,14 +112,14 @@ export const INITIAL_PROPERTIES = [
     lng: 30.9850,
     aqarScore: 9.8,
     images: [
-      'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Golf View', 'Private Pool', 'Private Garden', 'Smart Automation', 'Maid Room', 'Driver Room', 'Solar Power'],
     featured: true,
     viewsCount: 815,
-    owner: { name: 'Sodic Elite Resale', phone: '+201099887766', whatsapp: '+201099887766', verified: true }
+    owner: { name: 'Sodic Elite Resale', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   },
   {
     id: 3,
@@ -150,13 +150,13 @@ export const INITIAL_PROPERTIES = [
     lng: 27.8400,
     aqarScore: 9.6,
     images: [
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Direct Beachfront', 'Private Garden', 'Crystal Lagoon', 'Fully Furnished', 'Commercial Strip', 'Water Sports Center'],
     featured: true,
     viewsCount: 690,
-    owner: { name: 'Coastline Properties Egypt', phone: '+201055443322', whatsapp: '+201055443322', verified: true }
+    owner: { name: 'Coastline Properties Egypt', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   },
   {
     id: 4,
@@ -187,13 +187,13 @@ export const INITIAL_PROPERTIES = [
     lng: 31.7200,
     aqarScore: 9.1,
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Iconic Tower View', 'Central Fiber Internet', 'Meeting Rooms', 'Triple Height Lobby', 'Underground Parking', 'LEED Certified'],
     featured: false,
     viewsCount: 310,
-    owner: { name: 'Capital Commercial Hub', phone: '+201011223344', whatsapp: '+201011223344', verified: true }
+    owner: { name: 'Capital Commercial Hub', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   },
   {
     id: 5,
@@ -224,13 +224,13 @@ export const INITIAL_PROPERTIES = [
     lng: 31.2200,
     aqarScore: 9.7,
     images: [
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Panoramic Nile View', 'Rooftop Terrace', 'Marble Flooring', 'Concierge 24/7', 'Jacuzzi', 'High-Speed Elevators'],
     featured: true,
     viewsCount: 1250,
-    owner: { name: 'Zamalek Luxury Homes', phone: '+201077665544', whatsapp: '+201077665544', verified: true }
+    owner: { name: 'Zamalek Luxury Homes', phone: '+201004491026', whatsapp: '+201004491026', verified: true }
   },
   {
     id: 6,
@@ -261,8 +261,8 @@ export const INITIAL_PROPERTIES = [
     lng: 31.5420,
     aqarScore: 9.3,
     images: [
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=80'
+      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85',
+      'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1200&q=85'
     ],
     amenities: ['Private Garden', 'Lagoon Beach', 'Central Park', 'Clubhouse', 'Kids Area', 'Underground Parking'],
     featured: false,

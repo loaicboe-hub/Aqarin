@@ -36,8 +36,11 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { fetchProperties } from '../services/api';
 import PropertyCard from '../components/common/PropertyCard';
-import { EGYPT_LOCATIONS } from '../data/mockData';
 import { SITE_CONFIG } from '../config/siteConfig';
+import MarketTicker from '../components/common/MarketTicker';
+import CertifiedDevelopers from '../components/home/CertifiedDevelopers';
+import InstallmentCalculator from '../components/home/InstallmentCalculator';
+import LifestyleFilterChips from '../components/home/LifestyleFilterChips';
 
 export default function HomePage() {
   const { isRTL } = useLanguage();
@@ -147,6 +150,9 @@ export default function HomePage() {
   return (
     <div className="bg-white min-h-screen text-slate-900 pb-20 relative">
 
+      {/* Live Egypt Market Price Index Ticker */}
+      <MarketTicker />
+
       {/* ==========================================================
           1. HERO CONTAINER (Exact match to screenshot)
       ========================================================== */}
@@ -154,7 +160,7 @@ export default function HomePage() {
         <div 
           className="relative w-full rounded-[36px] sm:rounded-[44px] overflow-hidden bg-cover bg-center shadow-2xl pt-20 pb-16 sm:pt-28 sm:pb-24 px-4 sm:px-8 text-center"
           style={{ 
-            backgroundImage: `url('https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2000&q=80')` 
+            backgroundImage: `url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=85')` 
           }}
         >
           {/* Vignette / Gradient Overlay to ensure text readability */}
@@ -388,6 +394,9 @@ export default function HomePage() {
 
           </div>
 
+          {/* Lifestyle & Investment Quick Filter Chips */}
+          <LifestyleFilterChips />
+
         </div>
       </section>
 
@@ -418,7 +427,7 @@ export default function HomePage() {
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80"
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"
                 alt="Fast Sell Cash Offer"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -446,7 +455,7 @@ export default function HomePage() {
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
-                src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=600&q=80"
+                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
                 alt="Verified Listings"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -474,7 +483,7 @@ export default function HomePage() {
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
-                src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=600&q=80"
+                src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80"
                 alt="Property Management"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -502,7 +511,7 @@ export default function HomePage() {
           >
             <div className="w-full sm:w-56 md:w-64 h-44 sm:h-40 rounded-2xl overflow-hidden shrink-0 shadow-sm bg-slate-100">
               <img
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80"
+                src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80"
                 alt="Property Exchange"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -526,6 +535,9 @@ export default function HomePage() {
         </div>
 
       </section>
+
+      {/* Certified Top Master Developers Showcase */}
+      <CertifiedDevelopers />
 
       {/* ==========================================================
           3. LIVE MARKET REAL ESTATE BENCHMARKS INDEX
@@ -584,6 +596,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Smart Egyptian Installment & Payment Plan Calculator */}
+      <InstallmentCalculator />
 
       {/* ==========================================================
           4. WHY AQAR IN (Value Props)

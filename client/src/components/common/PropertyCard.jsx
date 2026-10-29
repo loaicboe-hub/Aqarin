@@ -56,6 +56,12 @@ export default function PropertyCard({ property }) {
             }`}>
               {property.purpose === 'rent' ? (isRTL ? 'للإيجار' : 'For Rent') : (isRTL ? 'للبيع' : 'For Sale')}
             </span>
+
+            {(property.deliveryStatus === 'ready' || property.delivery_status === 'ready') && (
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm bg-emerald-600 text-white">
+                {isRTL ? 'استلام فوري' : 'Ready'}
+              </span>
+            )}
           </div>
 
           <button
@@ -103,6 +109,22 @@ export default function PropertyCard({ property }) {
               {formatEGP(pricePerSqm)} {isRTL ? 'ج.م/م²' : 'EGP/m²'}
             </span>
           </div>
+
+          {/* Monthly Installment Callout (If Available) */}
+          {(property.monthlyInstallment > 0 || property.monthly_installment > 0) && (
+            <div className="flex items-center gap-1.5 text-xs text-amber-900 bg-amber-50/90 border border-amber-200/80 px-2.5 py-1 rounded-lg mb-2.5 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+              <span className="truncate">{isRTL ? 'قسط شهري:' : 'Monthly:'}</span>
+              <span className="font-mono font-black text-[#0B1C3D]">
+                {formatEGP(property.monthlyInstallment || property.monthly_installment)} {isRTL ? 'ج.م' : 'EGP'}
+              </span>
+              {(property.installmentYears > 0 || property.installment_years > 0) && (
+                <span className="text-[10px] text-slate-500 font-normal shrink-0">
+                  ({property.installmentYears || property.installment_years} {isRTL ? 'سنوات' : 'yrs'})
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Title */}
           <Link to={`/property/${property.id}`} className="block group-hover:text-sky-600 transition-colors">
