@@ -351,3 +351,59 @@ export async function resetPassword(token, newPassword) {
   return data;
 }
 
+// 11. Admin Deletion APIs
+export async function deleteAdminUser(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/users/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete user');
+  }
+  return data;
+}
+
+export async function deleteAdminLead(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/leads/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete lead inquiry');
+  }
+  return data;
+}
+
+export async function deleteAdminFastSell(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/fast-sell/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete fast sell request');
+  }
+  return data;
+}
+
+export async function deleteAdminExchange(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/exchange/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete exchange request');
+  }
+  return data;
+}
+
+export async function deleteAdminManagement(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/management/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete management contract');
+  }
+  return data;
+}
+
+export async function deleteAdminPartner(id) {
+  const res = await fetch(`${API_BASE_URL}/admin/partners/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete partner application');
+  }
+  return data;
+}
+
+

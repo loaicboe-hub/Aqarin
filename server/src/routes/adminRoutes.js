@@ -277,4 +277,113 @@ router.get('/reports', async (req, res) => {
   }
 });
 
+// 12. Administrative Deletion Endpoints
+// Delete User Account
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userCheck = await pool.query('SELECT id, role, email FROM users WHERE id = $1', [id]);
+    if (userCheck.rowCount === 0) {
+      return res.status(404).json({ error: true, message: 'User not found' });
+    }
+
+    // Safety: Protect single remaining master administrator
+    const { rows: adminCount } = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
+    if (userCheck.rows[0].role === 'admin' && parseInt(adminCount[0].count, 10) <= 1) {
+      return res.status(400).json({ error: true, message: 'Cannot delete the only active master administrator account' });
+    }
+
+    // Unlink foreign key relations to allow clean delete without cascade failures
+    await pool.query('UPDATE leads_inquiries SET user_id = NULL WHERE user_id = $1', [id]).catch(() => {});
+    await pool.query('UPDATE fast_sell_requests SET user_id = NULL WHERE user_id = $1', [id]).catch(() => {});
+    await pool.query('UPDATE property_exchange_requests SET user_id = NULL WHERE user_id = $1', [id]).catch(() => {});
+    await pool.query('UPDATE property_management_contracts SET user_id = NULL WHERE user_id = $1', [id]).catch(() => {});
+    await pool.query('UPDATE properties SET owner_id = NULL WHERE owner_id = $1', [id]).catch(() => {});
+
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete user: ' + err.message });
+  }
+});
+
+// Delete Customer Lead / Inquiry
+router.delete('/leads/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM leads_inquiries WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Inquiry record not found' });
+    res.json({ success: true, message: 'Inquiry deleted successfully' });
+  } catch (err) {
+    console.error('Delete lead error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete inquiry: ' + err.message });
+  }
+});
+
+// Delete Fast Sell Request
+router.delete('/fast-sell/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM fast_sell_requests WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Fast sell request not found' });
+    res.json({ success: true, message: 'Fast sell request deleted successfully' });
+  } catch (err) {
+    console.error('Delete fast sell error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete request: ' + err.message });
+  }
+});
+
+// Delete Property Exchange Deal
+router.delete('/exchange/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM property_exchange_requests WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Exchange request not found' });
+    res.json({ success: true, message: 'Property exchange request deleted successfully' });
+  } catch (err) {
+    console.error('Delete exchange error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete request: ' + err.message });
+  }
+});
+
+// Delete Property Management Contract
+router.delete('/management/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM property_management_contracts WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Management contract not found' });
+    res.json({ success: true, message: 'Property management contract deleted successfully' });
+  } catch (err) {
+    console.error('Delete management error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete contract: ' + err.message });
+  }
+});
+
+// Delete Partner Application
+router.delete('/partners/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM partner_applications WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Partner application not found' });
+    res.json({ success: true, message: 'Partner application deleted successfully' });
+  } catch (err) {
+    console.error('Delete partner error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete partner application: ' + err.message });
+  }
+});
+
+// Delete Finishing Request
+router.delete('/finishing/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query('DELETE FROM finishing_requests WHERE id = $1', [id]);
+    if (rowCount === 0) return res.status(404).json({ error: true, message: 'Finishing request not found' });
+    res.json({ success: true, message: 'Finishing request deleted successfully' });
+  } catch (err) {
+    console.error('Delete finishing error:', err);
+    res.status(500).json({ error: true, message: 'Failed to delete finishing request: ' + err.message });
+  }
+});
+
 export default router;

@@ -35,7 +35,8 @@ import {
   TrendingUp,
   FileText,
   BadgePercent,
-  PieChart
+  PieChart,
+  Eye
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -44,7 +45,9 @@ import {
   fetchAdminExchange, updateAdminExchangeStatus,
   fetchAdminManagement, updateAdminManagementStatus,
   fetchAdminPartners, updateAdminPartnerStatus,
-  fetchAdminReports
+  fetchAdminReports,
+  deleteAdminUser, deleteAdminLead, deleteAdminFastSell,
+  deleteAdminExchange, deleteAdminManagement, deleteAdminPartner
 } from '../services/api';
 import AdminLayout from '../components/admin/AdminLayout';
 
@@ -84,6 +87,81 @@ export default function AdminDashboardPage() {
   const [editUploadError, setEditUploadError] = useState('');
   const [editImageUrlInput, setEditImageUrlInput] = useState('');
   const editFileInputRef = React.useRef(null);
+
+  // Universal Details Inspection Modal state
+  const [inspectModal, setInspectModal] = useState({ open: false, type: null, data: null });
+
+  // Delete Confirmation Modal state
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, type: null, id: null, title: '' });
+  const [isDeletingRecord, setIsDeletingRecord] = useState(false);
+  const [adminToast, setAdminToast] = useState(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (adminToast) {
+      const timer = setTimeout(() => setAdminToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [adminToast]);
+
+  const triggerDelete = (type, id, title) => {
+    setDeleteConfirm({
+      open: true,
+      type,
+      id,
+      title: title || `#${id}`
+    });
+  };
+
+  const executeDelete = async () => {
+    const { type, id } = deleteConfirm;
+    if (!type || !id) return;
+    setIsDeletingRecord(true);
+    try {
+      if (type === 'user') {
+        await deleteAdminUser(id);
+        setUsersList(prev => prev.filter(u => u.id !== id));
+        setStats(prev => prev ? { ...prev, totalUsers: Math.max(0, (prev.totalUsers || 1) - 1) } : null);
+      } else if (type === 'lead') {
+        await deleteAdminLead(id);
+        setLeadsList(prev => prev.filter(l => l.id !== id));
+        setStats(prev => prev ? { ...prev, totalLeads: Math.max(0, (prev.totalLeads || 1) - 1) } : null);
+      } else if (type === 'fast-sell') {
+        await deleteAdminFastSell(id);
+        setFastSellList(prev => prev.filter(f => f.id !== id));
+        setStats(prev => prev ? { ...prev, totalFastSellRequests: Math.max(0, (prev.totalFastSellRequests || 1) - 1) } : null);
+      } else if (type === 'exchange') {
+        await deleteAdminExchange(id);
+        setExchangeList(prev => prev.filter(e => e.id !== id));
+        setStats(prev => prev ? { ...prev, totalExchangeRequests: Math.max(0, (prev.totalExchangeRequests || 1) - 1) } : null);
+      } else if (type === 'management') {
+        await deleteAdminManagement(id);
+        setManagementList(prev => prev.filter(m => m.id !== id));
+        setStats(prev => prev ? { ...prev, totalManagementContracts: Math.max(0, (prev.totalManagementContracts || 1) - 1) } : null);
+      } else if (type === 'partner') {
+        await deleteAdminPartner(id);
+        setPartnersList(prev => prev.filter(p => p.id !== id));
+      }
+
+      setAdminToast({
+        type: 'success',
+        message: isRTL ? 'تم حذف السجل بنجاح من قاعدة البيانات' : 'Record successfully deleted from database'
+      });
+
+      if (inspectModal.open && inspectModal.data?.id === id && inspectModal.type === type) {
+        setInspectModal({ open: false, type: null, data: null });
+      }
+    } catch (err) {
+      console.error('Delete execution error:', err);
+      setAdminToast({
+        type: 'error',
+        message: err.message || (isRTL ? 'فشل حذف السجل' : 'Failed to delete record')
+      });
+    } finally {
+      setIsDeletingRecord(false);
+      setDeleteConfirm({ open: false, type: null, id: null, title: '' });
+    }
+  };
 
   // Active view determination from pathname
   const currentPath = location.pathname;
@@ -857,24 +935,53 @@ export default function AdminDashboardPage() {
               <th className="p-3.5">{isRTL ? 'البريد الإلكتروني' : 'Email'}</th>
               <th className="p-3.5">{isRTL ? 'نوع الصلاحية' : 'Role'}</th>
               <th className="p-3.5">{isRTL ? 'تاريخ الإنشاء' : 'Created At'}</th>
+              <th className="p-3.5 text-center">{isRTL ? 'إجراءات' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {usersList.map((u) => (
-              <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3.5 font-mono text-slate-400">#{u.id}</td>
-                <td className="p-3.5 font-bold text-[#0B1C3D]">{u.full_name}</td>
-                <td className="p-3.5 text-slate-600 font-mono">{u.email}</td>
-                <td className="p-3.5">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                    u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
-                  }`}>
-                    {u.role}
-                  </span>
+            {usersList.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-slate-400">
+                  {isRTL ? 'لا يوجد مستخدمين مسجلين حالياً.' : 'No users registered yet.'}
                 </td>
-                <td className="p-3.5 text-slate-400">{new Date(u.created_at).toLocaleDateString()}</td>
               </tr>
-            ))}
+            ) : (
+              usersList.map((u) => (
+                <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-mono text-slate-400">#{u.id}</td>
+                  <td className="p-3.5 font-bold text-[#0B1C3D]">{u.full_name}</td>
+                  <td className="p-3.5 text-slate-600 font-mono">{u.email}</td>
+                  <td className="p-3.5">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                      u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="p-3.5 text-slate-400">{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td className="p-3.5 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'user', data: u })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('user', u.id, u.full_name || u.email)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف الحساب' : 'Delete User'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -971,6 +1078,14 @@ export default function AdminDashboardPage() {
                   </td>
                   <td className="p-3.5 text-center">
                     <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'lead', data: lead })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                       {lead.phone && (
                         <>
                           <a
@@ -991,6 +1106,14 @@ export default function AdminDashboardPage() {
                           </a>
                         </>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('lead', lead.id, lead.name ? `${lead.name} (#${lead.id})` : `#${lead.id}`)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف الاستفسار' : 'Delete Inquiry'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1099,17 +1222,35 @@ export default function AdminDashboardPage() {
                     </div>
                   </td>
                   <td className="p-3.5 text-center">
-                    {(item.phone || item.contact_phone) && (
-                      <a
-                        href={`https://wa.me/${(item.phone || item.contact_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name || item.contact_name}، بخصوص طلب البيع السريع لوحدتك في ${item.city}...` : `Hello ${item.owner_name || item.contact_name}, regarding your fast sell request in ${item.city}...`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                        title="WhatsApp"
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'fast-sell', data: item })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
                       >
-                        <MessageSquareShare className="w-4 h-4" />
-                      </a>
-                    )}
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {(item.phone || item.contact_phone) && (
+                        <a
+                          href={`https://wa.me/${(item.phone || item.contact_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name || item.contact_name}، بخصوص طلب البيع السريع لوحدتك في ${item.city}...` : `Hello ${item.owner_name || item.contact_name}, regarding your fast sell request in ${item.city}...`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                          title="WhatsApp"
+                        >
+                          <MessageSquareShare className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('fast-sell', item.id, item.owner_name ? `${item.owner_name} (${item.city})` : `#${item.id}`)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف طلب البيع السريع' : 'Delete Fast Sell Request'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -1188,17 +1329,35 @@ export default function AdminDashboardPage() {
                     </select>
                   </td>
                   <td className="p-3.5 text-center">
-                    {(item.phone || item.whatsapp) && (
-                      <a
-                        href={`https://wa.me/${(item.whatsapp || item.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً، بخصوص طلب البدل العقاري #${item.id} على منصة عقار إن...` : `Hello, regarding property swap #${item.id} on AQAR IN...`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                        title="WhatsApp"
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'exchange', data: item })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
                       >
-                        <MessageSquareShare className="w-4 h-4" />
-                      </a>
-                    )}
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {(item.phone || item.whatsapp) && (
+                        <a
+                          href={`https://wa.me/${(item.whatsapp || item.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً، بخصوص طلب البدل العقاري #${item.id} على منصة عقار إن...` : `Hello, regarding property swap #${item.id} on AQAR IN...`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                          title="WhatsApp"
+                        >
+                          <MessageSquareShare className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('exchange', item.id, `#${item.id} - ${item.current_city || 'Exchange'}`)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف طلب البدل' : 'Delete Exchange Deal'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -1277,17 +1436,35 @@ export default function AdminDashboardPage() {
                     </select>
                   </td>
                   <td className="p-3.5 text-center">
-                    {(item.phone || item.owner_phone) && (
-                      <a
-                        href={`https://wa.me/${(item.phone || item.owner_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name}، بخصوص باقة إدارة الأملاك لوحدتك في ${item.city}...` : `Hello ${item.owner_name}, regarding your property management plan...`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                        title="WhatsApp"
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'management', data: item })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
                       >
-                        <MessageSquareShare className="w-4 h-4" />
-                      </a>
-                    )}
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {(item.phone || item.owner_phone) && (
+                        <a
+                          href={`https://wa.me/${(item.phone || item.owner_phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً ${item.owner_name}، بخصوص باقة إدارة الأملاك لوحدتك في ${item.city}...` : `Hello ${item.owner_name}, regarding your property management plan...`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                          title="WhatsApp"
+                        >
+                          <MessageSquareShare className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('management', item.id, item.owner_name ? `${item.owner_name} (${item.plan_type || 'Contract'})` : `#${item.id}`)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف عقد الإدارة' : 'Delete Management Contract'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -1363,15 +1540,33 @@ export default function AdminDashboardPage() {
                     </select>
                   </td>
                   <td className="p-3.5 text-center">
-                    <a
-                      href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً أستاذ ${item.contact_person}، بخصوص طلب شراكة ${item.company_name} مع منصة عقار إن...` : `Hello ${item.contact_person}, regarding ${item.company_name}'s partnership application on AQAR IN...`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                      title="WhatsApp"
-                    >
-                      <MessageSquareShare className="w-4 h-4" />
-                    </a>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setInspectModal({ open: true, type: 'partner', data: item })}
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 transition-colors"
+                        title={isRTL ? 'عرض كامل التفاصيل' : 'View Full Details'}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <a
+                        href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً أستاذ ${item.contact_person}، بخصوص طلب شراكة ${item.company_name} مع منصة عقار إن...` : `Hello ${item.contact_person}, regarding ${item.company_name}'s partnership application on AQAR IN...`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageSquareShare className="w-4 h-4" />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => triggerDelete('partner', item.id, item.company_name || `#${item.id}`)}
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 transition-colors"
+                        title={isRTL ? 'حذف طلب الشراكة' : 'Delete Partner Application'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -2006,6 +2201,463 @@ export default function AdminDashboardPage() {
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* Universal Details Inspection Modal                             */}
+      {/* ============================================================== */}
+      {inspectModal.open && inspectModal.data && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-6 animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100 font-bold shrink-0">
+                  {inspectModal.type === 'user' && <Users className="w-5 h-5 text-purple-600" />}
+                  {inspectModal.type === 'lead' && <Inbox className="w-5 h-5 text-indigo-600" />}
+                  {inspectModal.type === 'fast-sell' && <Zap className="w-5 h-5 text-amber-500" />}
+                  {inspectModal.type === 'exchange' && <ArrowLeftRight className="w-5 h-5 text-sky-600" />}
+                  {inspectModal.type === 'management' && <Briefcase className="w-5 h-5 text-teal-600" />}
+                  {inspectModal.type === 'partner' && <Handshake className="w-5 h-5 text-emerald-600" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-black text-[#0B1C3D]">
+                      {inspectModal.type === 'user' && (isRTL ? 'تفاصيل حساب المستخدم' : 'User Account Details')}
+                      {inspectModal.type === 'lead' && (isRTL ? 'تفاصيل طلب الاستفسار' : 'Inquiry Lead Details')}
+                      {inspectModal.type === 'fast-sell' && (isRTL ? 'تفاصيل طلب البيع السريع' : 'Fast Sell Request Details')}
+                      {inspectModal.type === 'exchange' && (isRTL ? 'تفاصيل طلب البدل العقاري' : 'Property Exchange Details')}
+                      {inspectModal.type === 'management' && (isRTL ? 'تفاصيل عقد إدارة الأملاك' : 'Property Management Contract')}
+                      {inspectModal.type === 'partner' && (isRTL ? 'تفاصيل طلب الشراكة' : 'Partner Application Details')}
+                    </h3>
+                    <span className="font-mono text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                      #{inspectModal.data.id}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {isRTL ? 'عرض شامل لكافة البيانات المسجلة بقاعدة بيانات PostgreSQL' : 'Complete authoritative record from PostgreSQL 16'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setInspectModal({ open: false, type: null, data: null })}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body - Type Specific Information */}
+            <div className="space-y-4 text-xs">
+              
+              {/* 1. USER DETAILS */}
+              {inspectModal.type === 'user' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'الاسم الكامل' : 'Full Name'}</span>
+                    <p className="text-sm font-bold text-[#0B1C3D]">{inspectModal.data.full_name || '—'}</p>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'البريد الإلكتروني' : 'Email Address'}</span>
+                    <p className="text-sm font-mono font-bold text-slate-800 break-all">{inspectModal.data.email || '—'}</p>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</span>
+                    <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                      {inspectModal.data.phone || '—'}
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'نوع الصلاحية' : 'User Role'}</span>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                      inspectModal.data.role === 'admin' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-slate-200 text-slate-800'
+                    }`}>
+                      {inspectModal.data.role || 'user'}
+                    </span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 sm:col-span-2">
+                    <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'تاريخ التسجيل' : 'Registered On'}</span>
+                    <p className="font-mono text-slate-700">
+                      {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. LEAD / INQUIRY DETAILS */}
+              {inspectModal.type === 'lead' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'اسم العميل' : 'Client Name'}</span>
+                      <p className="text-sm font-bold text-[#0B1C3D]">{inspectModal.data.name || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'رقم الهاتف' : 'Phone'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {inspectModal.data.phone || '—'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'البريد الإلكتروني' : 'Email'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800 break-all">{inspectModal.data.email || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'وسيلة التواصل المفضلة' : 'Preferred Contact'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold uppercase text-xs border border-indigo-100">
+                        {inspectModal.data.preferred_contact || 'Phone'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Associated Property (if any) */}
+                  {inspectModal.data.property_id && (
+                    <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 space-y-2">
+                      <span className="text-sky-800 font-bold flex items-center justify-between">
+                        <span>{isRTL ? 'العقار المستفسر عنه' : 'Target Property'}</span>
+                        <Link 
+                          to={`/property/${inspectModal.data.property_id}`}
+                          target="_blank"
+                          className="text-xs text-sky-600 hover:underline flex items-center gap-1 font-bold"
+                        >
+                          <span>{isRTL ? 'فتح صفحة العقار' : 'View Property'}</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      </span>
+                      <p className="font-bold text-[#0B1C3D]">
+                        {isRTL ? (inspectModal.data.property_title_ar || inspectModal.data.property_title_en || inspectModal.data.title_ar || inspectModal.data.title_en) : (inspectModal.data.property_title_en || inspectModal.data.title_en)}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {inspectModal.data.property_city || inspectModal.data.city} • {inspectModal.data.property_district || inspectModal.data.district} • {formatEGP(inspectModal.data.property_price || inspectModal.data.price)} EGP
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Inquiry Message */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <span className="text-slate-400 font-semibold block">{isRTL ? 'نص رسالة العميل' : 'Customer Message'}</span>
+                    <p className="text-slate-800 leading-relaxed whitespace-pre-wrap font-medium">
+                      {inspectModal.data.message || (isRTL ? 'لا توجد رسالة مرفقة' : 'No message provided')}
+                    </p>
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {isRTL ? 'تاريخ الاستفسار:' : 'Date:'} {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. FAST SELL DETAILS */}
+              {inspectModal.type === 'fast-sell' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'المالك / جهة الاتصال' : 'Owner / Contact'}</span>
+                      <p className="text-sm font-bold text-[#0B1C3D]">{inspectModal.data.owner_name || inspectModal.data.contact_name || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'رقم الهاتف / واتساب' : 'Phone / WhatsApp'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {inspectModal.data.phone || inspectModal.data.contact_phone || inspectModal.data.whatsapp || '—'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'نوع الوحدة والمدينة' : 'Property Type & City'}</span>
+                      <p className="text-sm font-bold text-slate-800 capitalize">
+                        {inspectModal.data.property_type || 'Apartment'} • {inspectModal.data.city} {inspectModal.data.district ? `(${inspectModal.data.district})` : ''}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'الكمبوند / المنطقة' : 'Compound'}</span>
+                      <p className="text-sm font-bold text-slate-800">{inspectModal.data.compound || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'المساحة وحالة التشطيب' : 'Area & Finishing'}</span>
+                      <p className="text-sm font-bold text-slate-800">
+                        {inspectModal.data.area_sqm} m² • {inspectModal.data.finishing_type || 'Finished'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'السعر المطلوب' : 'Asking Price'}</span>
+                      <p className="text-sm font-extrabold text-emerald-700">
+                        {formatEGP(inspectModal.data.expected_price || inspectModal.data.asking_price)} EGP
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'العرض النقدي المقدم' : 'Current Cash Offer'}</span>
+                      <p className="text-sm font-extrabold text-sky-700">
+                        {inspectModal.data.cash_offer_amount ? `${formatEGP(inspectModal.data.cash_offer_amount)} EGP` : (isRTL ? 'لم يُقدم عرض بعد' : 'No cash offer yet')}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'حالة الطلب' : 'Status'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-bold capitalize text-xs">
+                        {inspectModal.data.status || 'pending'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {inspectModal.data.urgent_reason && (
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'سبب الرغبة في البيع السريع' : 'Urgent Reason'}</span>
+                      <p className="text-slate-800 font-medium">{inspectModal.data.urgent_reason}</p>
+                    </div>
+                  )}
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {isRTL ? 'تاريخ التقديم:' : 'Submission Date:'} {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. EXCHANGE DETAILS */}
+              {inspectModal.type === 'exchange' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                      <span className="text-slate-500 font-bold block">{isRTL ? '1. العقار المعروض للبدل' : '1. Offering Property Specs'}</span>
+                      <p className="text-slate-800 font-semibold leading-relaxed">
+                        {inspectModal.data.offering_specs || inspectModal.data.current_property_type || '—'}
+                      </p>
+                      {inspectModal.data.current_city && (
+                        <p className="text-xs text-sky-700 font-medium">{inspectModal.data.current_city}</p>
+                      )}
+                    </div>
+                    <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200 space-y-1.5">
+                      <span className="text-sky-800 font-bold block">{isRTL ? '2. العقار المطلوب للبدل' : '2. Desired Property Specs'}</span>
+                      <p className="text-[#0B1C3D] font-semibold leading-relaxed">
+                        {inspectModal.data.seeking_specs || inspectModal.data.desired_property_type || '—'}
+                      </p>
+                      {inspectModal.data.desired_city && (
+                        <p className="text-xs text-sky-700 font-medium">{inspectModal.data.desired_city}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'الهاتف / واتساب' : 'Contact Phone'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {inspectModal.data.phone || inspectModal.data.contact_phone || inspectModal.data.whatsapp || '—'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'حالة العرض' : 'Status'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-800 font-bold capitalize text-xs">
+                        {inspectModal.data.status || 'open'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {isRTL ? 'تاريخ التقديم:' : 'Submission Date:'} {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                  </div>
+                </div>
+              )}
+
+              {/* 5. PROPERTY MANAGEMENT DETAILS */}
+              {inspectModal.type === 'management' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'الباقة المختارة' : 'Selected Plan'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold uppercase text-xs border border-indigo-200">
+                        {inspectModal.data.plan_type || inspectModal.data.plan_name || 'Standard'}
+                      </span>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'اسم المالك' : 'Owner Name'}</span>
+                      <p className="text-sm font-bold text-[#0B1C3D]">{inspectModal.data.owner_name || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'رقم الهاتف' : 'Phone'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {inspectModal.data.phone || inspectModal.data.owner_phone || '—'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'المدينة والكمبوند' : 'City & Compound'}</span>
+                      <p className="text-sm font-bold text-slate-800">
+                        {inspectModal.data.city} {inspectModal.data.compound ? `• ${inspectModal.data.compound}` : ''}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'نوع العقار' : 'Property Type'}</span>
+                      <p className="text-sm font-bold text-slate-800 capitalize">{inspectModal.data.property_type || 'Apartment'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'حالة العقد' : 'Status'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 font-bold capitalize text-xs">
+                        {inspectModal.data.status || 'pending'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {isRTL ? 'تاريخ التسجيل:' : 'Contract Date:'} {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                  </div>
+                </div>
+              )}
+
+              {/* 6. PARTNER DETAILS */}
+              {inspectModal.type === 'partner' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'اسم الكيان / الشركة' : 'Company'}</span>
+                      <p className="text-sm font-bold text-[#0B1C3D]">{inspectModal.data.company_name || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'نوع الشراكة' : 'Partner Type'}</span>
+                      <span className="inline-block px-3 py-1 rounded-full bg-slate-200 text-slate-800 font-bold capitalize text-xs">
+                        {inspectModal.data.partner_type || 'Developer'}
+                      </span>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'المسؤول' : 'Contact Person'}</span>
+                      <p className="text-sm font-bold text-slate-800">{inspectModal.data.contact_person || '—'}</p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'رقم الهاتف' : 'Phone'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {inspectModal.data.phone || '—'}
+                      </p>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 sm:col-span-2">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'البريد الإلكتروني' : 'Email'}</span>
+                      <p className="text-sm font-mono font-bold text-slate-800 break-all">{inspectModal.data.email || '—'}</p>
+                    </div>
+                  </div>
+
+                  {inspectModal.data.message && (
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                      <span className="text-slate-400 font-semibold block mb-1">{isRTL ? 'ملاحظات / رسالة الطلب' : 'Message'}</span>
+                      <p className="text-slate-800 font-medium leading-relaxed whitespace-pre-wrap">{inspectModal.data.message}</p>
+                    </div>
+                  )}
+
+                  <div className="text-[11px] text-slate-400 font-mono">
+                    {isRTL ? 'تاريخ التقديم:' : 'Submission Date:'} {inspectModal.data.created_at ? new Date(inspectModal.data.created_at).toLocaleString() : '—'}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Footer with Actions and Delete */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
+              {/* Delete Button on Left */}
+              <button
+                type="button"
+                onClick={() => {
+                  const id = inspectModal.data.id;
+                  const type = inspectModal.type;
+                  const title = inspectModal.data.name || inspectModal.data.full_name || inspectModal.data.company_name || inspectModal.data.owner_name || `#${id}`;
+                  triggerDelete(type, id, title);
+                }}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 font-bold text-xs flex items-center justify-center gap-2 border border-rose-200 transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                <span>{isRTL ? 'حذف هذا السجل نهائياً' : 'Delete Record'}</span>
+              </button>
+
+              {/* Close & Contact Buttons on Right */}
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                {/* WhatsApp Quick Chat if phone exists */}
+                {(inspectModal.data.phone || inspectModal.data.owner_phone || inspectModal.data.contact_phone || inspectModal.data.whatsapp) && (
+                  <a
+                    href={`https://wa.me/${(inspectModal.data.phone || inspectModal.data.owner_phone || inspectModal.data.contact_phone || inspectModal.data.whatsapp).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(isRTL ? `مرحباً، بخصوص طلبك المسجل على منصة عقار إن...` : `Hello, regarding your request on AQAR IN...`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 transition-colors"
+                  >
+                    <MessageSquareShare className="w-4 h-4 text-emerald-600" />
+                    <span>WhatsApp</span>
+                  </a>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setInspectModal({ open: false, type: null, data: null })}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  {isRTL ? 'إغلاق' : 'Close'}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* Delete Confirmation Modal                                       */}
+      {/* ============================================================== */}
+      {deleteConfirm.open && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-base font-black text-[#0B1C3D]">
+                  {isRTL ? 'تأكيد حذف السجل نهائياً' : 'Confirm Permanent Deletion'}
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {isRTL 
+                    ? `هل أنت متأكد من رغبتك في حذف السجل (${deleteConfirm.title})؟ سيتم مسح البيانات نهائياً من قاعدة البيانات ولا يمكن استرجاعها.`
+                    : `Are you sure you want to permanently delete record (${deleteConfirm.title})? This action cannot be undone.`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                disabled={isDeletingRecord}
+                onClick={() => setDeleteConfirm({ open: false, type: null, id: null, title: '' })}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors disabled:opacity-50"
+              >
+                {isRTL ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingRecord}
+                onClick={executeDelete}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isDeletingRecord ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <span>{isDeletingRecord ? (isRTL ? 'جاري الحذف...' : 'Deleting...') : (isRTL ? 'نعم، حذف نهائي' : 'Yes, Delete Permanently')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* Toast Notification Banner                                      */}
+      {/* ============================================================== */}
+      {adminToast && (
+        <div className="fixed bottom-6 start-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold animate-in slide-in-from-bottom-3 duration-200 bg-slate-900 text-white border-slate-700">
+          {adminToast.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          )}
+          <span>{adminToast.message}</span>
+          <button 
+            type="button" 
+            onClick={() => setAdminToast(null)}
+            className="ms-2 text-slate-400 hover:text-white"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </AdminLayout>
