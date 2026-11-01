@@ -131,13 +131,6 @@ export function SignInPage() {
           </Link>
         </div>
 
-        {/* Quick Admin Demo Helper */}
-        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center text-[11px] text-slate-500">
-          <p className="font-semibold text-slate-700 mb-1">{isRTL ? 'تجربة الدخول كمسؤول (Admin Demo):' : 'Demo Credentials:'}</p>
-          <p className="font-mono text-[#0B1C3D] font-bold">admin@aqarin.com</p>
-          <p className="font-mono text-slate-400 text-[10px]">password: admin123</p>
-        </div>
-
       </div>
     </div>
   );
